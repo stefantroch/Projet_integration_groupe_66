@@ -1,0 +1,122 @@
+[
+  {
+    "id": "table.Address",
+    "label": "Create table \"Address\"",
+    "summary": "Creates table \"Address\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "Address"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"Address\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Address\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"Address\"",
+        "sql": "CREATE TABLE \"public\".\"Address\" (\n  \"city\" text NOT NULL,\n  \"country\" text NOT NULL,\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"id\" SERIAL NOT NULL,\n  \"postalCode\" text NOT NULL,\n  \"street\" text NOT NULL,\n  \"updatedAt\" timestamptz NOT NULL,\n  \"userId\" int4 NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"Address\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Address\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.Address.Address_userId_idx_a489d58a",
+    "label": "Create index \"Address_userId_idx_a489d58a\" on \"Address\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "Address_userId_idx_a489d58a",
+        "table": "Address"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"Address_userId_idx_a489d58a\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Address_userId_idx_a489d58a\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"Address_userId_idx_a489d58a\"",
+        "sql": "CREATE INDEX \"Address_userId_idx_a489d58a\" ON \"public\".\"Address\" (\"userId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"Address_userId_idx_a489d58a\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Address_userId_idx_a489d58a\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.Address.Address_userId_fkey",
+    "label": "Add foreign key \"Address_userId_fkey\" on \"Address\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "Address_userId_fkey",
+        "table": "Address"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"Address_userId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Address_userId_fkey",
+          "public",
+          "\"public\".\"Address\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"Address_userId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"Address\"\nADD CONSTRAINT \"Address_userId_fkey\"\nFOREIGN KEY (\"userId\")\nREFERENCES \"public\".\"User\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"Address_userId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Address_userId_fkey",
+          "public",
+          "\"public\".\"Address\""
+        ]
+      }
+    ]
+  }
+]
