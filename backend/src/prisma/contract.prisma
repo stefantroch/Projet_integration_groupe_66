@@ -1,21 +1,112 @@
 // use prisma-8
 
-model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  username  String?
-  name      String?
-  posts     Post[]
-  createdAt TimestamptzString @default(now())
-  updatedAt temporal.updatedAtString()
+model Utilisateur {
+  idUtilisateur Int    @id @default(autoincrement()) @map("id")
+  pseudo        String @unique
+  email         String @unique
+  emailVerified Boolean @default(false)
+  image         String?
+  dateCreation  TimestamptzString @default(now())
+  dateModification TimestamptzString @default(now())
+
+  sessions         Session[]
+  comptes          Account[]
+  animauxDebloques AnimalDebloque[]
+  trophees         TropheeUtilisateur[]
 }
 
-model Post {
-  id        Int      @id @default(autoincrement())
-  title     String
-  content   String?
-  author    User     @relation(fields: [authorId], references: [id])
-  authorId  Int
+model Session {
+  id        Int @id @default(autoincrement())
+  userId    Int
+  token     String @unique
+  expiresAt TimestamptzString
   createdAt TimestamptzString @default(now())
-  updatedAt temporal.updatedAtString()
+  updatedAt TimestamptzString @default(now())
+  ipAddress String?
+  userAgent String?
+
+  utilisateur Utilisateur @relation(fields: [userId], references: [idUtilisateur], onDelete: Cascade)
+
+  @@map("session")
+}
+
+model Account {
+  id                     Int @id @default(autoincrement())
+  userId                 Int
+  accountId              String
+  providerId             String
+  password               String?
+  accessToken            String?
+  refreshToken           String?
+  idToken                String?
+  accessTokenExpiresAt   TimestamptzString?
+  refreshTokenExpiresAt  TimestamptzString?
+  scope                  String?
+  createdAt              TimestamptzString @default(now())
+  updatedAt              TimestamptzString @default(now())
+
+  utilisateur Utilisateur @relation(fields: [userId], references: [idUtilisateur], onDelete: Cascade)
+
+  @@map("account")
+}
+
+model Verification {
+  id         Int @id @default(autoincrement())
+  identifier String
+  value      String
+  expiresAt  TimestamptzString
+  createdAt  TimestamptzString @default(now())
+  updatedAt  TimestamptzString @default(now())
+
+  @@index([identifier])
+  @@map("verification")
+}
+
+model Animal {
+  idAnimal     Int @id @default(autoincrement())
+  idZoo        Int
+
+  nom          String
+  famille      String
+  habitat      String
+  alimentation String
+  description  String
+  imageFiche   String
+
+  debloquePar AnimalDebloque[]
+}
+
+model AnimalDebloque {
+  idUtilisateur Int
+  idAnimal      Int
+
+  dateDeblocage TimestamptzString @default(now())
+
+  utilisateur Utilisateur @relation(fields: [idUtilisateur], references: [idUtilisateur])
+  animal      Animal      @relation(fields: [idAnimal], references: [idAnimal])
+
+  @@id([idUtilisateur, idAnimal])
+}
+
+model Trophee {
+  idTrophee          Int @id @default(autoincrement())
+
+  nom                String
+  description        String
+  conditionObtention String
+  icone              String
+
+  utilisateurs TropheeUtilisateur[]
+}
+
+model TropheeUtilisateur {
+  idUtilisateur Int
+  idTrophee     Int
+
+  dateObtention TimestamptzString @default(now())
+
+  utilisateur Utilisateur @relation(fields: [idUtilisateur], references: [idUtilisateur])
+  trophee     Trophee     @relation(fields: [idTrophee], references: [idTrophee])
+
+  @@id([idUtilisateur, idTrophee])
 }

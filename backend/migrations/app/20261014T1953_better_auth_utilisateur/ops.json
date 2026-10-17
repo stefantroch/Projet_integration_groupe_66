@@ -1,0 +1,28 @@
+[
+  {
+    "id": "unifyBetterAuthUtilisateur",
+    "label": "Unify the empty legacy authentication schema with Utilisateur",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "Utilisateur"
+      }
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "Refuse populated authentication tables, then install the shared schema",
+        "sql": "\nDO $$\nDECLARE\n  table_name text;\n  has_rows boolean;\nBEGIN\n  FOREACH table_name IN ARRAY ARRAY['Utilisateur', 'user', 'session', 'account', 'verification'] LOOP\n    IF to_regclass(format('public.%I', table_name)) IS NOT NULL THEN\n      EXECUTE format('LOCK TABLE public.%I IN ACCESS EXCLUSIVE MODE', table_name);\n      EXECUTE format('SELECT EXISTS (SELECT 1 FROM public.%I)', table_name) INTO has_rows;\n      IF has_rows THEN\n        RAISE EXCEPTION 'Authentication migration requires empty tables; % contains data. Migrate existing accounts before continuing.', table_name;\n      END IF;\n    END IF;\n  END LOOP;\nEND $$;\n\nDROP TABLE IF EXISTS public.\"session\", public.\"account\", public.\"verification\";\nDROP TABLE IF EXISTS public.\"user\";\n\n-- A rename preserves the primary key, sequence and animal/trophy foreign keys.\nALTER TABLE public.\"Utilisateur\" RENAME COLUMN \"idUtilisateur\" TO \"id\";\nALTER TABLE public.\"Utilisateur\"\n  DROP COLUMN \"mdpHash\",\n  ADD COLUMN \"emailVerified\" boolean NOT NULL DEFAULT false,\n  ADD COLUMN \"image\" text,\n  ADD COLUMN \"dateModification\" timestamptz NOT NULL DEFAULT now();\n\nCREATE TABLE public.\"session\" (\n  \"id\" serial PRIMARY KEY,\n  \"userId\" integer NOT NULL REFERENCES public.\"Utilisateur\" (\"id\") ON DELETE CASCADE,\n  \"token\" text NOT NULL UNIQUE,\n  \"expiresAt\" timestamptz NOT NULL,\n  \"createdAt\" timestamptz NOT NULL DEFAULT now(),\n  \"updatedAt\" timestamptz NOT NULL DEFAULT now(),\n  \"ipAddress\" text,\n  \"userAgent\" text\n);\nCREATE INDEX \"session_userId_idx_a489d58a\" ON public.\"session\" (\"userId\");\n\nCREATE TABLE public.\"account\" (\n  \"id\" serial PRIMARY KEY,\n  \"userId\" integer NOT NULL REFERENCES public.\"Utilisateur\" (\"id\") ON DELETE CASCADE,\n  \"accountId\" text NOT NULL,\n  \"providerId\" text NOT NULL,\n  \"password\" text,\n  \"accessToken\" text,\n  \"refreshToken\" text,\n  \"idToken\" text,\n  \"accessTokenExpiresAt\" timestamptz,\n  \"refreshTokenExpiresAt\" timestamptz,\n  \"scope\" text,\n  \"createdAt\" timestamptz NOT NULL DEFAULT now(),\n  \"updatedAt\" timestamptz NOT NULL DEFAULT now()\n);\nCREATE INDEX \"account_userId_idx_a489d58a\" ON public.\"account\" (\"userId\");\n\nCREATE TABLE public.\"verification\" (\n  \"id\" serial PRIMARY KEY,\n  \"identifier\" text NOT NULL,\n  \"value\" text NOT NULL,\n  \"expiresAt\" timestamptz NOT NULL,\n  \"createdAt\" timestamptz NOT NULL DEFAULT now(),\n  \"updatedAt\" timestamptz NOT NULL DEFAULT now()\n);\nCREATE INDEX \"verification_identifier_idx_79a0dbb3\" ON public.\"verification\" (\"identifier\");\n"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "The old user table must be gone",
+        "sql": "SELECT to_regclass('public.\"user\"') IS NULL AS result"
+      }
+    ]
+  }
+]
