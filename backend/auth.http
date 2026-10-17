@@ -1,0 +1,26 @@
+@baseUrl = http://localhost:3000
+@origin = http://localhost:8081
+@email = greg@example.com
+@password = MonMotDePasse123!
+@pseudo = greg
+
+### Inscription (signup)
+POST {{baseUrl}}/api/auth/sign-up/email
+Content-Type: application/json
+Origin: {{origin}}
+
+{
+  "name": "{{pseudo}}",
+  "email": "{{email}}",
+  "password": "{{password}}"
+}
+
+### Connexion (signin)
+POST {{baseUrl}}/api/auth/sign-in/email
+Content-Type: application/json
+Origin: {{origin}}
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}"
+}
