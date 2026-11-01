@@ -2,7 +2,7 @@ import { useState } from "react";
 import { View, Text, TextInput, Pressable, StyleSheet } from "react-native";
 import { authClient } from "@/lib/auth-client";
 import { colors } from "@/constants/colors";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");
@@ -17,7 +17,7 @@ export default function LoginForm() {
       setErrorMessage(error.message ?? "Erreur de connexion");
       return;
     }
-    console.log("Connecté :", data.user.name);
+    router.replace("/home");
   };
 
   return (
