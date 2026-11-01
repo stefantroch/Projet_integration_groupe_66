@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { View, Text, TextInput, Pressable, StyleSheet } from "react-native";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 import { authClient } from "@/lib/auth-client";
 import { colors } from "@/constants/colors";
 
@@ -25,7 +25,7 @@ export default function SignupForm() {
       setErrorMessage(error.message ?? "Erreur lors de l'inscription");
       return;
     }
-    console.log("Compte créé :", data.user.name);
+    router.replace("/home");
   };
 
   return (

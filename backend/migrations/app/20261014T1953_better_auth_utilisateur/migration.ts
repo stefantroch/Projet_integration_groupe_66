@@ -106,6 +106,13 @@ CREATE INDEX "verification_identifier_idx_79a0dbb3" ON public."verification" ("i
             description: 'The old user table must be gone',
             sql: `SELECT to_regclass('public."user"') IS NULL AS result`,
           },
+          {
+            description: 'Utilisateur must be keyed by id and the auth tables must exist',
+            sql: `SELECT EXISTS (
+  SELECT 1 FROM information_schema.columns
+  WHERE table_schema = 'public' AND table_name = 'Utilisateur' AND column_name = 'id'
+) AND to_regclass('public."session"') IS NOT NULL AS result`,
+          },
         ],
       }),
     ];
