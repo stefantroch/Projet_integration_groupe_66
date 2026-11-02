@@ -1,6 +1,7 @@
 import { View, Text, Pressable, StyleSheet } from "react-native";
 import { authClient } from "@/lib/auth-client";
 import { colors } from "@/constants/colors";
+import { router } from "expo-router";
 
 const sections = ["Ma collection", "Capturer", "Habitat", "Succès"];
 
@@ -16,7 +17,11 @@ export default function AccueilScreen() {
 
         <View style={styles.grid}>
           {sections.map((section) => (
-            <Pressable key={section} style={styles.tile}>
+            <Pressable
+              key={section}
+              style={styles.tile}
+              onPress={() => section === "Capturer" && router.push("/capture")}
+            >
               <View style={styles.tileButton}>
                 <Text style={styles.tileText}>{section}</Text>
               </View>
