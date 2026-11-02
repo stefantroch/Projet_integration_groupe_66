@@ -255,9 +255,11 @@ Puis tester la route avec un fichier `.http` (voir `auth.http`) : d'abord se con
 - [ ] `npx @nestjs/cli g resource <nom>` → **REST API**, CRUD **No** (lecture seule)
 - [ ] Si CRUD **Yes** : supprimer `entities/`, les routes/méthodes en trop, `dto/` et les imports orphelins
 - [ ] `@Controller('api/<nom>')`
+- [ ] `@ApiTags('<nom>')` sur le controller (groupe les routes dans Swagger)
 - [ ] `ParseIntPipe` sur les `:id`
 - [ ] Module ajouté dans `src/api/api.module.ts` (import en `.js`)
 - [ ] Service : requêtes `db.orm.public.<Modèle>` à la place des textes bidon
 - [ ] `@Session()` si la réponse dépend du joueur
 - [ ] `@nestjs/mapped-types` avec une vraie version dans `package.json`
 - [ ] `npx tsc --noEmit`, `npm test`, `npm run lint` OK
+- [ ] Route testée dans Swagger (`http://localhost:3000/api/docs`) et ajoutée dans `docs/routes.md`

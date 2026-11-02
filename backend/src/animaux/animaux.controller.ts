@@ -1,8 +1,10 @@
 import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { Session, type UserSession } from '@thallesp/nestjs-better-auth';
 import { AnimauxService } from './animaux.service.js';
 
 
+@ApiTags('animaux')
 @Controller('api/animaux')
 export class AnimauxController {
   constructor(private readonly animauxService: AnimauxService) {}
