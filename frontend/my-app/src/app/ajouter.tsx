@@ -1,17 +1,25 @@
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import { useState } from 'react';
-import { Alert, Platform, Pressable, StyleSheet } from 'react-native';
+import { Platform, Pressable, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 
+// Adresse du back. Depuis le navigateur : localhost.
+// Depuis un téléphone : remplace "localhost" par l'adresse IP de ton ordinateur
+// (ex. http://192.168.1.20:3000).
+const API_URL = 'http://localhost:3000';
+
+type Message = { ok: boolean; text: string } | null;
+
 export default function AjouterScreen() {
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [asset, setAsset] = useState<ImagePicker.ImagePickerAsset | null>(null);
   const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<Message>(null);
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -25,6 +33,7 @@ export default function AjouterScreen() {
     const picked = result.assets[0];
     setAsset(picked);
     setImageUri(picked.uri);
+    setMessage(null);
   };
 
   const removeImage = () => {
@@ -36,27 +45,38 @@ export default function AjouterScreen() {
     if (!asset) return;
 
     setLoading(true);
+    setMessage(null);
     try {
-      // TODO: brancher le back ici.
-      // Exemple d'envoi en multipart/form-data :
-      //
-      // const formData = new FormData();
-      // formData.append('image', {
-      //   uri: asset.uri,
-      //   name: asset.fileName ?? 'photo.jpg',
-      //   type: asset.mimeType ?? 'image/jpeg',
-      // } as any);
-      //
-      // const response = await fetch('https://TON_API/collection', {
-      //   method: 'POST',
-      //   body: formData,
-      // });
-      // if (!response.ok) throw new Error('Erreur serveur');
+      const formData = new FormData();
 
-      Alert.alert('Succès', "L'image a été ajoutée à la collection.");
+      if (Platform.OS === 'web') {
+        // Sur le web, il faut envoyer un vrai fichier (Blob)
+        const blob = await (await fetch(asset.uri)).blob();
+        formData.append('image', blob, asset.fileName ?? 'photo.jpg');
+      } else {
+        // Sur mobile, React Native accepte cet objet
+        formData.append('image', {
+          uri: asset.uri,
+          name: asset.fileName ?? 'photo.jpg',
+          type: asset.mimeType ?? 'image/jpeg',
+        } as any);
+      }
+
+      const response = await fetch(`${API_URL}/collection`, {
+        method: 'POST',
+        body: formData, // pas de header Content-Type : il est ajouté automatiquement
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error(`Erreur serveur (${response.status})`);
+      }
+
+      setMessage({ ok: true, text: "✓ L'image a été ajoutée à la collection." });
       removeImage();
-    } catch {
-      Alert.alert('Erreur', "Impossible d'ajouter l'image. Réessaie.");
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : 'Erreur inconnue';
+      setMessage({ ok: false, text: `✗ Impossible d'ajouter l'image. ${detail}` });
     } finally {
       setLoading(false);
     }
@@ -72,9 +92,7 @@ export default function AjouterScreen() {
           </ThemedText>
         </ThemedView>
 
-        <Pressable
-          onPress={pickImage}
-          style={({ pressed }) => pressed && styles.pressed}>
+        <Pressable onPress={pickImage} style={({ pressed }) => pressed && styles.pressed}>
           <ThemedView type="backgroundElement" style={styles.preview}>
             {imageUri ? (
               <Image source={{ uri: imageUri }} style={styles.image} contentFit="cover" />
@@ -87,9 +105,7 @@ export default function AjouterScreen() {
         </Pressable>
 
         <ThemedView style={styles.actions}>
-          <Pressable
-            onPress={pickImage}
-            style={({ pressed }) => pressed && styles.pressed}>
+          <Pressable onPress={pickImage} style={({ pressed }) => pressed && styles.pressed}>
             <ThemedView type="backgroundElement" style={styles.button}>
               <ThemedText type="link">
                 {imageUri ? "Changer d'image" : 'Choisir depuis la galerie'}
@@ -110,14 +126,18 @@ export default function AjouterScreen() {
                 </ThemedView>
               </Pressable>
 
-              <Pressable
-                onPress={removeImage}
-                style={({ pressed }) => pressed && styles.pressed}>
+              <Pressable onPress={removeImage} style={({ pressed }) => pressed && styles.pressed}>
                 <ThemedText type="small" themeColor="textSecondary" style={styles.centerText}>
                   Retirer l&apos;image
                 </ThemedText>
               </Pressable>
             </>
+          )}
+
+          {message && (
+            <ThemedText type="small" style={styles.centerText}>
+              {message.text}
+            </ThemedText>
           )}
         </ThemedView>
       </SafeAreaView>
