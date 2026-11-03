@@ -62,3 +62,11 @@ dist/
 
 # Local AI work: keep code, datasets, models and environments out of Git
 /ai-recognition/
+
+.env.prod
+
+.env.prod
+
+node_modules/
+dist/
+.env.prod

@@ -1,0 +1,19 @@
+# Image de production du frontend : export web statique d'Expo, servi par nginx.
+#
+# EXPO_PUBLIC_API_URL est injectée DANS le bundle au moment du build
+# (changer sa valeur => rebuild de l'image). Par défaut "/api" : le reverse
+# proxy Caddy route /api/* vers le backend sur le même domaine.
+
+FROM node:24-alpine AS build
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+ARG EXPO_PUBLIC_API_URL=/api
+ENV EXPO_PUBLIC_API_URL=$EXPO_PUBLIC_API_URL
+RUN npx expo export --platform web
+
+FROM nginx:alpine
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=build /app/dist /usr/share/nginx/html
+EXPOSE 80
