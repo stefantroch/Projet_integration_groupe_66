@@ -1,0 +1,88 @@
+# Déploiement de production (VPS) :
+#   docker compose -f compose.prod.yml --env-file .env.prod up -d --build
+#
+# Seuls les ports 80/443 (Caddy) sont exposés. Postgres, backend et frontend
+# restent sur le réseau interne Docker.
+
+name: projet66
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-projet66}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD manquant dans .env.prod}
+      POSTGRES_DB: ${POSTGRES_DB:-projet66}
+    volumes:
+      - postgres18_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Conteneur one-shot : applique les migrations Prisma avant le démarrage du back.
+  # (Prisma 8 n'applique pas les migrations au runtime : à lancer dans le déploiement.)
+  migrate:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
+      target: build
+    command: ["npx", "prisma", "db", "migrate"]
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-projet66}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-projet66}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: postgresql://${POSTGRES_USER:-projet66}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-projet66}
+      # Origine(s) publique(s) du front, séparées par des virgules (CORS + Better Auth)
+      FRONTEND_ORIGINS: ${PUBLIC_URL:?PUBLIC_URL manquant dans .env.prod}
+      # URL publique de l'app + secret de signature des sessions (obligatoire en prod)
+      BETTER_AUTH_URL: ${PUBLIC_URL}
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?BETTER_AUTH_SECRET manquant dans .env.prod}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+
+  frontend:
+    build:
+      context: ./frontend/my-app
+      dockerfile: Dockerfile.prod
+      args:
+        EXPO_PUBLIC_API_URL: ${EXPO_PUBLIC_API_URL:-/api}
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:-:80}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - frontend
+      - backend
+
+volumes:
+  postgres18_data:
+  caddy_data:
+  caddy_config:

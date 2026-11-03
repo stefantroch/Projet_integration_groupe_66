@@ -1,0 +1,19 @@
+# Reverse proxy unique : un seul domaine pour le front et l'API
+# (pas de CORS cross-site, cookies d'auth en same-site).
+#
+# SITE_ADDRESS (défini dans .env.prod) :
+#   - un nom de domaine, ex. app.mondomaine.be  -> HTTPS automatique (Let's Encrypt)
+#   - ":80"                                     -> HTTP simple, accès par IP (tests uniquement)
+{$SITE_ADDRESS:localhost} {
+	encode zstd gzip
+
+	# Better Auth et les futurs contrôleurs de l'API : tout ce qui est sous /api
+	handle /api/* {
+		reverse_proxy backend:3000
+	}
+
+	# Le reste : le frontend (nginx)
+	handle {
+		reverse_proxy frontend:80
+	}
+}
