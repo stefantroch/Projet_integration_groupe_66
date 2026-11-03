@@ -60,5 +60,8 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 node_modules/
 dist/
 
-# Local AI work: keep code, datasets, models and environments out of Git
-/ai-recognition/
+# Local AI artifacts; keep source code tracked.
+/ai-recognition/.venv/
+/ai-recognition/data/
+/ai-recognition/checkpoints/
+/ai-recognition/**/__pycache__/

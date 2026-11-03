@@ -60,6 +60,19 @@ services:
     depends_on:
       - backend
 
+  recognition:
+    build:
+      context: ./ai-recognition
+      dockerfile: Dockerfile
+    container_name: projet66-recognition
+    restart: unless-stopped
+    environment:
+      MODEL_PATH: /models/best_model.pth
+    volumes:
+      - ./ai-recognition/checkpoints:/models:ro
+    ports:
+      - "8000:8000"
+
 volumes:
   postgres18_data:
   backend_node_modules:
