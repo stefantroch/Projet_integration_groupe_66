@@ -34,7 +34,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'dcf143cda7452e7774d557f2e3bac38590b347a54bd52e00de71a58410933757'>;
+  StorageHashBase<'627360f09f3abf8a9c7d5725f4784c8db3747ca130941faee3b3246cb45a14c4'>;
 export type ExecutionHash = ExecutionHashBase<string>;
 export type ProfileHash =
   ProfileHashBase<'3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2'>;
@@ -266,18 +266,28 @@ export type FieldOutputTypes = {
     };
     readonly Animal: {
       readonly alimentation: CodecTypes['pg/text@1']['output'];
+      readonly cleModele: CodecTypes['pg/text@1']['output'];
       readonly description: CodecTypes['pg/text@1']['output'];
       readonly famille: CodecTypes['pg/text@1']['output'];
       readonly habitat: CodecTypes['pg/text@1']['output'];
       readonly idAnimal: CodecTypes['pg/int4@1']['output'];
-      readonly idZoo: CodecTypes['pg/int4@1']['output'];
       readonly imageFiche: CodecTypes['pg/text@1']['output'];
       readonly nom: CodecTypes['pg/text@1']['output'];
+      readonly nomScientifique: CodecTypes['pg/text@1']['output'];
+      readonly numero: CodecTypes['pg/int4@1']['output'];
     };
     readonly AnimalDebloque: {
       readonly dateDeblocage: CodecTypes['pg/timestamptz-string@1']['output'];
       readonly idAnimal: CodecTypes['pg/int4@1']['output'];
       readonly idUtilisateur: CodecTypes['pg/int4@1']['output'];
+    };
+    readonly Capture: {
+      readonly cheminPhoto: CodecTypes['pg/text@1']['output'];
+      readonly dateCapture: CodecTypes['pg/timestamptz-string@1']['output'];
+      readonly idAnimal: CodecTypes['pg/int4@1']['output'];
+      readonly idCapture: CodecTypes['pg/int4@1']['output'];
+      readonly idUtilisateur: CodecTypes['pg/int4@1']['output'];
+      readonly score: CodecTypes['pg/float8@1']['output'];
     };
     readonly Session: {
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
@@ -339,18 +349,28 @@ export type FieldInputTypes = {
     };
     readonly Animal: {
       readonly alimentation: CodecTypes['pg/text@1']['input'];
+      readonly cleModele: CodecTypes['pg/text@1']['input'];
       readonly description: CodecTypes['pg/text@1']['input'];
       readonly famille: CodecTypes['pg/text@1']['input'];
       readonly habitat: CodecTypes['pg/text@1']['input'];
       readonly idAnimal: CodecTypes['pg/int4@1']['input'];
-      readonly idZoo: CodecTypes['pg/int4@1']['input'];
       readonly imageFiche: CodecTypes['pg/text@1']['input'];
       readonly nom: CodecTypes['pg/text@1']['input'];
+      readonly nomScientifique: CodecTypes['pg/text@1']['input'];
+      readonly numero: CodecTypes['pg/int4@1']['input'];
     };
     readonly AnimalDebloque: {
       readonly dateDeblocage: CodecTypes['pg/timestamptz-string@1']['input'];
       readonly idAnimal: CodecTypes['pg/int4@1']['input'];
       readonly idUtilisateur: CodecTypes['pg/int4@1']['input'];
+    };
+    readonly Capture: {
+      readonly cheminPhoto: CodecTypes['pg/text@1']['input'];
+      readonly dateCapture: CodecTypes['pg/timestamptz-string@1']['input'];
+      readonly idAnimal: CodecTypes['pg/int4@1']['input'];
+      readonly idCapture: CodecTypes['pg/int4@1']['input'];
+      readonly idUtilisateur: CodecTypes['pg/int4@1']['input'];
+      readonly score: CodecTypes['pg/float8@1']['input'];
     };
     readonly Session: {
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['input'];
@@ -412,18 +432,28 @@ export type StorageColumnTypes = {
     };
     readonly Animal: {
       readonly alimentation: CodecTypes['pg/text@1']['output'];
+      readonly cleModele: CodecTypes['pg/text@1']['output'];
       readonly description: CodecTypes['pg/text@1']['output'];
       readonly famille: CodecTypes['pg/text@1']['output'];
       readonly habitat: CodecTypes['pg/text@1']['output'];
       readonly idAnimal: CodecTypes['pg/int4@1']['output'];
-      readonly idZoo: CodecTypes['pg/int4@1']['output'];
       readonly imageFiche: CodecTypes['pg/text@1']['output'];
       readonly nom: CodecTypes['pg/text@1']['output'];
+      readonly nomScientifique: CodecTypes['pg/text@1']['output'];
+      readonly numero: CodecTypes['pg/int4@1']['output'];
     };
     readonly AnimalDebloque: {
       readonly dateDeblocage: CodecTypes['pg/timestamptz-string@1']['output'];
       readonly idAnimal: CodecTypes['pg/int4@1']['output'];
       readonly idUtilisateur: CodecTypes['pg/int4@1']['output'];
+    };
+    readonly Capture: {
+      readonly cheminPhoto: CodecTypes['pg/text@1']['output'];
+      readonly dateCapture: CodecTypes['pg/timestamptz-string@1']['output'];
+      readonly idAnimal: CodecTypes['pg/int4@1']['output'];
+      readonly idCapture: CodecTypes['pg/int4@1']['output'];
+      readonly idUtilisateur: CodecTypes['pg/int4@1']['output'];
+      readonly score: CodecTypes['pg/float8@1']['output'];
     };
     readonly session: {
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
@@ -485,18 +515,28 @@ export type StorageColumnInputTypes = {
     };
     readonly Animal: {
       readonly alimentation: CodecTypes['pg/text@1']['input'];
+      readonly cleModele: CodecTypes['pg/text@1']['input'];
       readonly description: CodecTypes['pg/text@1']['input'];
       readonly famille: CodecTypes['pg/text@1']['input'];
       readonly habitat: CodecTypes['pg/text@1']['input'];
       readonly idAnimal: CodecTypes['pg/int4@1']['input'];
-      readonly idZoo: CodecTypes['pg/int4@1']['input'];
       readonly imageFiche: CodecTypes['pg/text@1']['input'];
       readonly nom: CodecTypes['pg/text@1']['input'];
+      readonly nomScientifique: CodecTypes['pg/text@1']['input'];
+      readonly numero: CodecTypes['pg/int4@1']['input'];
     };
     readonly AnimalDebloque: {
       readonly dateDeblocage: CodecTypes['pg/timestamptz-string@1']['input'];
       readonly idAnimal: CodecTypes['pg/int4@1']['input'];
       readonly idUtilisateur: CodecTypes['pg/int4@1']['input'];
+    };
+    readonly Capture: {
+      readonly cheminPhoto: CodecTypes['pg/text@1']['input'];
+      readonly dateCapture: CodecTypes['pg/timestamptz-string@1']['input'];
+      readonly idAnimal: CodecTypes['pg/int4@1']['input'];
+      readonly idCapture: CodecTypes['pg/int4@1']['input'];
+      readonly idUtilisateur: CodecTypes['pg/int4@1']['input'];
+      readonly score: CodecTypes['pg/float8@1']['input'];
     };
     readonly session: {
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['input'];
@@ -560,20 +600,34 @@ export namespace Models {
   };
   export type public_Animal = {
     alimentation: CodecTypes['pg/text@1']['output'];
+    cleModele: CodecTypes['pg/text@1']['output'];
     description: CodecTypes['pg/text@1']['output'];
     famille: CodecTypes['pg/text@1']['output'];
     habitat: CodecTypes['pg/text@1']['output'];
     idAnimal: CodecTypes['pg/int4@1']['output'];
-    idZoo: CodecTypes['pg/int4@1']['output'];
     imageFiche: CodecTypes['pg/text@1']['output'];
     nom: CodecTypes['pg/text@1']['output'];
+    nomScientifique: CodecTypes['pg/text@1']['output'];
+    numero: CodecTypes['pg/int4@1']['output'];
+    captures: public_Capture[];
     debloquePar: public_AnimalDebloque[];
-    readonly [RelationKeys]?: 'debloquePar';
+    readonly [RelationKeys]?: 'captures' | 'debloquePar';
   };
   export type public_AnimalDebloque = {
     dateDeblocage: CodecTypes['pg/timestamptz-string@1']['output'];
     idAnimal: CodecTypes['pg/int4@1']['output'];
     idUtilisateur: CodecTypes['pg/int4@1']['output'];
+    animal: public_Animal;
+    utilisateur: public_Utilisateur;
+    readonly [RelationKeys]?: 'animal' | 'utilisateur';
+  };
+  export type public_Capture = {
+    cheminPhoto: CodecTypes['pg/text@1']['output'];
+    dateCapture: CodecTypes['pg/timestamptz-string@1']['output'];
+    idAnimal: CodecTypes['pg/int4@1']['output'];
+    idCapture: CodecTypes['pg/int4@1']['output'];
+    idUtilisateur: CodecTypes['pg/int4@1']['output'];
+    score: CodecTypes['pg/float8@1']['output'];
     animal: public_Animal;
     utilisateur: public_Utilisateur;
     readonly [RelationKeys]?: 'animal' | 'utilisateur';
@@ -616,10 +670,11 @@ export namespace Models {
     image: CodecTypes['pg/text@1']['output'] | null;
     pseudo: CodecTypes['pg/text@1']['output'];
     animauxDebloques: public_AnimalDebloque[];
+    captures: public_Capture[];
     comptes: public_Account[];
     sessions: public_Session[];
     trophees: public_TropheeUtilisateur[];
-    readonly [RelationKeys]?: 'animauxDebloques' | 'comptes' | 'sessions' | 'trophees';
+    readonly [RelationKeys]?: 'animauxDebloques' | 'captures' | 'comptes' | 'sessions' | 'trophees';
   };
   export type public_Verification = {
     createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
@@ -637,6 +692,7 @@ export declare const models: {
     Account: Models.public_Account;
     Animal: Models.public_Animal;
     AnimalDebloque: Models.public_AnimalDebloque;
+    Capture: Models.public_Capture;
     Session: Models.public_Session;
     Trophee: Models.public_Trophee;
     TropheeUtilisateur: Models.public_TropheeUtilisateur;
@@ -769,6 +825,11 @@ type ContractBase = Omit<
                   readonly codecId: 'pg/text@1';
                   readonly nullable: false;
                 };
+                readonly cleModele: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                };
                 readonly description: {
                   readonly nativeType: 'text';
                   readonly codecId: 'pg/text@1';
@@ -793,11 +854,6 @@ type ContractBase = Omit<
                     readonly expression: 'autoincrement()';
                   };
                 };
-                readonly idZoo: {
-                  readonly nativeType: 'int4';
-                  readonly codecId: 'pg/int4@1';
-                  readonly nullable: false;
-                };
                 readonly imageFiche: {
                   readonly nativeType: 'text';
                   readonly codecId: 'pg/text@1';
@@ -808,9 +864,22 @@ type ContractBase = Omit<
                   readonly codecId: 'pg/text@1';
                   readonly nullable: false;
                 };
+                readonly nomScientifique: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                };
+                readonly numero: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                };
               };
               primaryKey: { readonly columns: readonly ['idAnimal'] };
-              uniques: readonly [];
+              uniques: readonly [
+                { readonly columns: readonly ['numero'] },
+                { readonly columns: readonly ['cleModele'] },
+              ];
               indexes: readonly [];
               foreignKeys: readonly [];
             };
@@ -866,6 +935,93 @@ type ContractBase = Omit<
                   readonly source: {
                     readonly namespaceId: 'public' & NamespaceId;
                     readonly tableName: 'AnimalDebloque';
+                    readonly columns: readonly ['idAnimal'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'Animal';
+                    readonly columns: readonly ['idAnimal'];
+                  };
+                },
+              ];
+            };
+            readonly Capture: {
+              columns: {
+                readonly cheminPhoto: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                };
+                readonly dateCapture: {
+                  readonly nativeType: 'timestamptz';
+                  readonly codecId: 'pg/timestamptz-string@1';
+                  readonly nullable: false;
+                  readonly default: { readonly kind: 'function'; readonly expression: 'now()' };
+                };
+                readonly idAnimal: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                };
+                readonly idCapture: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'function';
+                    readonly expression: 'autoincrement()';
+                  };
+                };
+                readonly idUtilisateur: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                };
+                readonly score: {
+                  readonly nativeType: 'float8';
+                  readonly codecId: 'pg/float8@1';
+                  readonly nullable: false;
+                };
+              };
+              primaryKey: { readonly columns: readonly ['idCapture'] };
+              uniques: readonly [];
+              indexes: readonly [
+                {
+                  readonly name: 'Capture_idAnimal_idx_7cf4df29';
+                  readonly prefix: 'Capture_idAnimal_idx';
+                  readonly columns: readonly ['idAnimal'];
+                  readonly unique: false;
+                },
+                {
+                  readonly name: 'Capture_idUtilisateur_idAnimal_idx_aed493f1';
+                  readonly prefix: 'Capture_idUtilisateur_idAnimal_idx';
+                  readonly columns: readonly ['idUtilisateur', 'idAnimal'];
+                  readonly unique: false;
+                },
+                {
+                  readonly name: 'Capture_idUtilisateur_idx_384e96e2';
+                  readonly prefix: 'Capture_idUtilisateur_idx';
+                  readonly columns: readonly ['idUtilisateur'];
+                  readonly unique: false;
+                },
+              ];
+              foreignKeys: readonly [
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'Capture';
+                    readonly columns: readonly ['idUtilisateur'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'Utilisateur';
+                    readonly columns: readonly ['id'];
+                  };
+                },
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'Capture';
                     readonly columns: readonly ['idAnimal'];
                   };
                   readonly target: {
@@ -1172,6 +1328,7 @@ type ContractBase = Omit<
       readonly namespace: 'public' & NamespaceId;
       readonly model: 'AnimalDebloque';
     };
+    readonly Capture: { readonly namespace: 'public' & NamespaceId; readonly model: 'Capture' };
     readonly Trophee: { readonly namespace: 'public' & NamespaceId; readonly model: 'Trophee' };
     readonly TropheeUtilisateur: {
       readonly namespace: 'public' & NamespaceId;
@@ -1299,6 +1456,10 @@ type ContractBase = Omit<
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
+              readonly cleModele: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
               readonly description: {
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
@@ -1315,10 +1476,6 @@ type ContractBase = Omit<
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
               };
-              readonly idZoo: {
-                readonly nullable: false;
-                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
-              };
               readonly imageFiche: {
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
@@ -1327,8 +1484,27 @@ type ContractBase = Omit<
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
+              readonly nomScientifique: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly numero: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
             };
             readonly relations: {
+              readonly captures: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'Capture';
+                };
+                readonly cardinality: '1:N';
+                readonly on: {
+                  readonly localFields: readonly ['idAnimal'];
+                  readonly targetFields: readonly ['idAnimal'];
+                };
+              };
               readonly debloquePar: {
                 readonly to: {
                   readonly namespace: 'public' & NamespaceId;
@@ -1346,13 +1522,15 @@ type ContractBase = Omit<
               readonly namespaceId: 'public';
               readonly fields: {
                 readonly alimentation: { readonly column: 'alimentation' };
+                readonly cleModele: { readonly column: 'cleModele' };
                 readonly description: { readonly column: 'description' };
                 readonly famille: { readonly column: 'famille' };
                 readonly habitat: { readonly column: 'habitat' };
                 readonly idAnimal: { readonly column: 'idAnimal' };
-                readonly idZoo: { readonly column: 'idZoo' };
                 readonly imageFiche: { readonly column: 'imageFiche' };
                 readonly nom: { readonly column: 'nom' };
+                readonly nomScientifique: { readonly column: 'nomScientifique' };
+                readonly numero: { readonly column: 'numero' };
               };
             };
           };
@@ -1407,6 +1585,75 @@ type ContractBase = Omit<
                 readonly dateDeblocage: { readonly column: 'dateDeblocage' };
                 readonly idAnimal: { readonly column: 'idAnimal' };
                 readonly idUtilisateur: { readonly column: 'idUtilisateur' };
+              };
+            };
+          };
+          readonly Capture: {
+            readonly fields: {
+              readonly cheminPhoto: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly dateCapture: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-string@1';
+                };
+              };
+              readonly idAnimal: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly idCapture: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly idUtilisateur: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly score: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/float8@1' };
+              };
+            };
+            readonly relations: {
+              readonly animal: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'Animal';
+                };
+                readonly cardinality: 'N:1';
+                readonly nullable: false;
+                readonly on: {
+                  readonly localFields: readonly ['idAnimal'];
+                  readonly targetFields: readonly ['idAnimal'];
+                };
+              };
+              readonly utilisateur: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'Utilisateur';
+                };
+                readonly cardinality: 'N:1';
+                readonly nullable: false;
+                readonly on: {
+                  readonly localFields: readonly ['idUtilisateur'];
+                  readonly targetFields: readonly ['idUtilisateur'];
+                };
+              };
+            };
+            readonly storage: {
+              readonly table: 'Capture';
+              readonly namespaceId: 'public';
+              readonly fields: {
+                readonly cheminPhoto: { readonly column: 'cheminPhoto' };
+                readonly dateCapture: { readonly column: 'dateCapture' };
+                readonly idAnimal: { readonly column: 'idAnimal' };
+                readonly idCapture: { readonly column: 'idCapture' };
+                readonly idUtilisateur: { readonly column: 'idUtilisateur' };
+                readonly score: { readonly column: 'score' };
               };
             };
           };
@@ -1627,6 +1874,17 @@ type ContractBase = Omit<
                 readonly to: {
                   readonly namespace: 'public' & NamespaceId;
                   readonly model: 'AnimalDebloque';
+                };
+                readonly cardinality: '1:N';
+                readonly on: {
+                  readonly localFields: readonly ['idUtilisateur'];
+                  readonly targetFields: readonly ['idUtilisateur'];
+                };
+              };
+              readonly captures: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'Capture';
                 };
                 readonly cardinality: '1:N';
                 readonly on: {
