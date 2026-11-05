@@ -1,0 +1,494 @@
+[
+  {
+    "id": "dropColumn.Animal.idZoo",
+    "label": "Drop column \"idZoo\" from \"Animal\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "idZoo",
+        "table": "Animal"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"idZoo\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "Animal",
+          "idZoo"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "drop column \"idZoo\"",
+        "sql": "ALTER TABLE \"public\".\"Animal\" DROP COLUMN \"idZoo\""
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"idZoo\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "Animal",
+          "idZoo"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.Capture",
+    "label": "Create table \"Capture\"",
+    "summary": "Creates table \"Capture\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "Capture"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"Capture\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Capture\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"Capture\"",
+        "sql": "CREATE TABLE \"public\".\"Capture\" (\n  \"cheminPhoto\" text NOT NULL,\n  \"dateCapture\" timestamptz DEFAULT (now()) NOT NULL,\n  \"idAnimal\" int4 NOT NULL,\n  \"idCapture\" SERIAL NOT NULL,\n  \"idUtilisateur\" int4 NOT NULL,\n  \"score\" float8 NOT NULL,\n  PRIMARY KEY (\"idCapture\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"Capture\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Capture\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.Animal.cleModele",
+    "label": "Add column \"cleModele\" to \"Animal\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "cleModele",
+        "table": "Animal"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"cleModele\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "Animal",
+          "cleModele"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"cleModele\"",
+        "sql": "ALTER TABLE \"public\".\"Animal\" ADD COLUMN \"cleModele\" text NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"cleModele\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "Animal",
+          "cleModele"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.Animal.nomScientifique",
+    "label": "Add column \"nomScientifique\" to \"Animal\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "nomScientifique",
+        "table": "Animal"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"nomScientifique\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "Animal",
+          "nomScientifique"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"nomScientifique\"",
+        "sql": "ALTER TABLE \"public\".\"Animal\" ADD COLUMN \"nomScientifique\" text NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"nomScientifique\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "Animal",
+          "nomScientifique"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.Animal.numero",
+    "label": "Add column \"numero\" to \"Animal\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "numero",
+        "table": "Animal"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"numero\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "Animal",
+          "numero"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"numero\"",
+        "sql": "ALTER TABLE \"public\".\"Animal\" ADD COLUMN \"numero\" int4 NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"numero\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "Animal",
+          "numero"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.Animal.Animal_cleModele_key",
+    "label": "Add unique constraint on \"Animal\" (cleModele)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "Animal_cleModele_key",
+        "table": "Animal"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"Animal_cleModele_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Animal_cleModele_key",
+          "public",
+          "\"public\".\"Animal\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"Animal_cleModele_key\"",
+        "sql": "ALTER TABLE \"public\".\"Animal\" ADD CONSTRAINT \"Animal_cleModele_key\" UNIQUE (\"cleModele\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"Animal_cleModele_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Animal_cleModele_key",
+          "public",
+          "\"public\".\"Animal\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.Animal.Animal_numero_key",
+    "label": "Add unique constraint on \"Animal\" (numero)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "Animal_numero_key",
+        "table": "Animal"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"Animal_numero_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Animal_numero_key",
+          "public",
+          "\"public\".\"Animal\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"Animal_numero_key\"",
+        "sql": "ALTER TABLE \"public\".\"Animal\" ADD CONSTRAINT \"Animal_numero_key\" UNIQUE (\"numero\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"Animal_numero_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Animal_numero_key",
+          "public",
+          "\"public\".\"Animal\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.Capture.Capture_idAnimal_idx_7cf4df29",
+    "label": "Create index \"Capture_idAnimal_idx_7cf4df29\" on \"Capture\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "Capture_idAnimal_idx_7cf4df29",
+        "table": "Capture"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"Capture_idAnimal_idx_7cf4df29\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Capture_idAnimal_idx_7cf4df29\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"Capture_idAnimal_idx_7cf4df29\"",
+        "sql": "CREATE INDEX \"Capture_idAnimal_idx_7cf4df29\" ON \"public\".\"Capture\" (\"idAnimal\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"Capture_idAnimal_idx_7cf4df29\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Capture_idAnimal_idx_7cf4df29\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.Capture.Capture_idUtilisateur_idAnimal_idx_aed493f1",
+    "label": "Create index \"Capture_idUtilisateur_idAnimal_idx_aed493f1\" on \"Capture\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "Capture_idUtilisateur_idAnimal_idx_aed493f1",
+        "table": "Capture"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"Capture_idUtilisateur_idAnimal_idx_aed493f1\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Capture_idUtilisateur_idAnimal_idx_aed493f1\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"Capture_idUtilisateur_idAnimal_idx_aed493f1\"",
+        "sql": "CREATE INDEX \"Capture_idUtilisateur_idAnimal_idx_aed493f1\" ON \"public\".\"Capture\" (\"idUtilisateur\", \"idAnimal\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"Capture_idUtilisateur_idAnimal_idx_aed493f1\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Capture_idUtilisateur_idAnimal_idx_aed493f1\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.Capture.Capture_idUtilisateur_idx_384e96e2",
+    "label": "Create index \"Capture_idUtilisateur_idx_384e96e2\" on \"Capture\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "Capture_idUtilisateur_idx_384e96e2",
+        "table": "Capture"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"Capture_idUtilisateur_idx_384e96e2\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Capture_idUtilisateur_idx_384e96e2\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"Capture_idUtilisateur_idx_384e96e2\"",
+        "sql": "CREATE INDEX \"Capture_idUtilisateur_idx_384e96e2\" ON \"public\".\"Capture\" (\"idUtilisateur\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"Capture_idUtilisateur_idx_384e96e2\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Capture_idUtilisateur_idx_384e96e2\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.Capture.Capture_idUtilisateur_fkey",
+    "label": "Add foreign key \"Capture_idUtilisateur_fkey\" on \"Capture\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "Capture_idUtilisateur_fkey",
+        "table": "Capture"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"Capture_idUtilisateur_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Capture_idUtilisateur_fkey",
+          "public",
+          "\"public\".\"Capture\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"Capture_idUtilisateur_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"Capture\"\nADD CONSTRAINT \"Capture_idUtilisateur_fkey\"\nFOREIGN KEY (\"idUtilisateur\")\nREFERENCES \"public\".\"Utilisateur\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"Capture_idUtilisateur_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Capture_idUtilisateur_fkey",
+          "public",
+          "\"public\".\"Capture\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.Capture.Capture_idAnimal_fkey",
+    "label": "Add foreign key \"Capture_idAnimal_fkey\" on \"Capture\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "Capture_idAnimal_fkey",
+        "table": "Capture"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"Capture_idAnimal_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Capture_idAnimal_fkey",
+          "public",
+          "\"public\".\"Capture\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"Capture_idAnimal_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"Capture\"\nADD CONSTRAINT \"Capture_idAnimal_fkey\"\nFOREIGN KEY (\"idAnimal\")\nREFERENCES \"public\".\"Animal\" (\"idAnimal\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"Capture_idAnimal_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Capture_idAnimal_fkey",
+          "public",
+          "\"public\".\"Capture\""
+        ]
+      }
+    ]
+  }
+]

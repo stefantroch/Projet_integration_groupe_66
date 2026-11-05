@@ -12,6 +12,10 @@
       "model": "AnimalDebloque",
       "namespace": "public"
     },
+    "Capture": {
+      "model": "Capture",
+      "namespace": "public"
+    },
     "Trophee": {
       "model": "Trophee",
       "namespace": "public"
@@ -208,6 +212,13 @@
                   "kind": "scalar"
                 }
               },
+              "cleModele": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "description": {
                 "nullable": false,
                 "type": {
@@ -236,13 +247,6 @@
                   "kind": "scalar"
                 }
               },
-              "idZoo": {
-                "nullable": false,
-                "type": {
-                  "codecId": "pg/int4@1",
-                  "kind": "scalar"
-                }
-              },
               "imageFiche": {
                 "nullable": false,
                 "type": {
@@ -256,9 +260,38 @@
                   "codecId": "pg/text@1",
                   "kind": "scalar"
                 }
+              },
+              "nomScientifique": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "numero": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
               }
             },
             "relations": {
+              "captures": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "idAnimal"
+                  ],
+                  "targetFields": [
+                    "idAnimal"
+                  ]
+                },
+                "to": {
+                  "model": "Capture",
+                  "namespace": "public"
+                }
+              },
               "debloquePar": {
                 "cardinality": "1:N",
                 "on": {
@@ -280,6 +313,9 @@
                 "alimentation": {
                   "column": "alimentation"
                 },
+                "cleModele": {
+                  "column": "cleModele"
+                },
                 "description": {
                   "column": "description"
                 },
@@ -292,14 +328,17 @@
                 "idAnimal": {
                   "column": "idAnimal"
                 },
-                "idZoo": {
-                  "column": "idZoo"
-                },
                 "imageFiche": {
                   "column": "imageFiche"
                 },
                 "nom": {
                   "column": "nom"
+                },
+                "nomScientifique": {
+                  "column": "nomScientifique"
+                },
+                "numero": {
+                  "column": "numero"
                 }
               },
               "namespaceId": "public",
@@ -378,6 +417,110 @@
               },
               "namespaceId": "public",
               "table": "AnimalDebloque"
+            }
+          },
+          "Capture": {
+            "fields": {
+              "cheminPhoto": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "dateCapture": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "idAnimal": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "idCapture": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "idUtilisateur": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "score": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/float8@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {
+              "animal": {
+                "cardinality": "N:1",
+                "nullable": false,
+                "on": {
+                  "localFields": [
+                    "idAnimal"
+                  ],
+                  "targetFields": [
+                    "idAnimal"
+                  ]
+                },
+                "to": {
+                  "model": "Animal",
+                  "namespace": "public"
+                }
+              },
+              "utilisateur": {
+                "cardinality": "N:1",
+                "nullable": false,
+                "on": {
+                  "localFields": [
+                    "idUtilisateur"
+                  ],
+                  "targetFields": [
+                    "idUtilisateur"
+                  ]
+                },
+                "to": {
+                  "model": "Utilisateur",
+                  "namespace": "public"
+                }
+              }
+            },
+            "storage": {
+              "fields": {
+                "cheminPhoto": {
+                  "column": "cheminPhoto"
+                },
+                "dateCapture": {
+                  "column": "dateCapture"
+                },
+                "idAnimal": {
+                  "column": "idAnimal"
+                },
+                "idCapture": {
+                  "column": "idCapture"
+                },
+                "idUtilisateur": {
+                  "column": "idUtilisateur"
+                },
+                "score": {
+                  "column": "score"
+                }
+              },
+              "namespaceId": "public",
+              "table": "Capture"
             }
           },
           "Session": {
@@ -707,6 +850,21 @@
                   "namespace": "public"
                 }
               },
+              "captures": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "idUtilisateur"
+                  ],
+                  "targetFields": [
+                    "idUtilisateur"
+                  ]
+                },
+                "to": {
+                  "model": "Capture",
+                  "namespace": "public"
+                }
+              },
               "comptes": {
                 "cardinality": "1:N",
                 "on": {
@@ -868,6 +1026,11 @@
                   "nativeType": "text",
                   "nullable": false
                 },
+                "cleModele": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
                 "description": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
@@ -892,11 +1055,6 @@
                   "nativeType": "int4",
                   "nullable": false
                 },
-                "idZoo": {
-                  "codecId": "pg/int4@1",
-                  "nativeType": "int4",
-                  "nullable": false
-                },
                 "imageFiche": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
@@ -905,6 +1063,16 @@
                 "nom": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
+                  "nullable": false
+                },
+                "nomScientifique": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "numero": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
                   "nullable": false
                 }
               },
@@ -915,7 +1083,18 @@
                   "idAnimal"
                 ]
               },
-              "uniques": []
+              "uniques": [
+                {
+                  "columns": [
+                    "numero"
+                  ]
+                },
+                {
+                  "columns": [
+                    "cleModele"
+                  ]
+                }
+              ]
             },
             "AnimalDebloque": {
               "columns": {
@@ -995,6 +1174,116 @@
                 "columns": [
                   "idUtilisateur",
                   "idAnimal"
+                ]
+              },
+              "uniques": []
+            },
+            "Capture": {
+              "columns": {
+                "cheminPhoto": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "dateCapture": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "idAnimal": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "idCapture": {
+                  "codecId": "pg/int4@1",
+                  "default": {
+                    "expression": "autoincrement()",
+                    "kind": "function"
+                  },
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "idUtilisateur": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "score": {
+                  "codecId": "pg/float8@1",
+                  "nativeType": "float8",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [
+                {
+                  "onDelete": "cascade",
+                  "source": {
+                    "columns": [
+                      "idUtilisateur"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "Capture"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "Utilisateur"
+                  }
+                },
+                {
+                  "source": {
+                    "columns": [
+                      "idAnimal"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "Capture"
+                  },
+                  "target": {
+                    "columns": [
+                      "idAnimal"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "Animal"
+                  }
+                }
+              ],
+              "indexes": [
+                {
+                  "columns": [
+                    "idAnimal"
+                  ],
+                  "name": "Capture_idAnimal_idx_7cf4df29",
+                  "prefix": "Capture_idAnimal_idx",
+                  "unique": false
+                },
+                {
+                  "columns": [
+                    "idUtilisateur",
+                    "idAnimal"
+                  ],
+                  "name": "Capture_idUtilisateur_idAnimal_idx_aed493f1",
+                  "prefix": "Capture_idUtilisateur_idAnimal_idx",
+                  "unique": false
+                },
+                {
+                  "columns": [
+                    "idUtilisateur"
+                  ],
+                  "name": "Capture_idUtilisateur_idx_384e96e2",
+                  "prefix": "Capture_idUtilisateur_idx",
+                  "unique": false
+                }
+              ],
+              "primaryKey": {
+                "columns": [
+                  "idCapture"
                 ]
               },
               "uniques": []
@@ -1478,7 +1767,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "dcf143cda7452e7774d557f2e3bac38590b347a54bd52e00de71a58410933757"
+    "storageHash": "627360f09f3abf8a9c7d5725f4784c8db3747ca130941faee3b3246cb45a14c4"
   },
   "capabilities": {
     "postgres": {
