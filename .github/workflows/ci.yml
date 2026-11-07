@@ -118,7 +118,7 @@ jobs:
             - name: installation des requirements
               run: pip install -r requirements-api.txt
             - name: vérif que l'api se charge
-              run: python -c "impor src.api"
+              run: python -c "import src.api"
 
 
 
