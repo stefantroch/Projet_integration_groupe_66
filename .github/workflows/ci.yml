@@ -7,27 +7,67 @@ on:
 
 
 jobs:
-    #premier job on teste le back & la db
+
     test-backend:
-        runs-on: ubuntu-latest
+        runs-on: ubuntu-latest # Runner
+        # on a besoin de simuler la db
+        services:
+            postgres:
+                image: postgres:18-alpine
+                env:
+                    POSTGRES_USER: dev
+                    POSTGRES_PASSWORD: devtest
+                    POSTGRES_DB : projet66
+                ports:
+                 - 5432:5432
+                options: >-
+                    --health-cmd pg_isready
+                    --health-interval 10s
+                    --health-timeout 5s
+                    --health-retries 5
+
+        env:
+            DATABASE_URL: postgresql://dev:devtest@localhost:5432/projet66
+
+        # definir le working directory
         defaults:
             run:
               working-directory: backend
+
+        # Ici les differents tests
         steps: 
             - uses: actions/checkout@v6 # runner
             - name: Set up node.js
               uses: actions/setup-node@v7
               with: 
                 node-version : '24.x'
+            # Utiliser une cache pour les dép
+            - name: Cache npm backend packages-lock.json
+              uses: actions/cache@v4
+              env:
+                cache-name: npm-backend
+              with:
+                path: ~/.npm
+                key: ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles('backend/package-lock.json') }}
+                restore-keys: |
+                    ${{ runner.os }}-${{ env.cache-name }}-
+            
+
             
             - name: install dependencies
               run: npm ci
-            - name:  tests # test des 
-              run: npm run test
-            - name: Lint tests # test lint
+
+            # Tests lint // bonnes pratiques
+            - name: Lint tests 
               run: npm run lint
-            # - name: DB test
-            #   run: npm run test:auth
+            # Tests Unitaires
+            - name:  tests 
+              run: npm run test
+            # Tests d'intégration
+            - name: Integration test
+              run: npm run test:auth
+
+
     # test-frontend:
     #        runs-on : ubuntu-latest
     #        steps:
