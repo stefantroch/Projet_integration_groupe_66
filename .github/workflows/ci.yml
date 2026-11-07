@@ -1,0 +1,41 @@
+# Nom du script
+name : Tests CI 
+on: 
+    push
+    # pull_request:
+    #     branches: dev
+
+
+jobs:
+    #premier job on teste le back & la db
+    test-backend:
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+              working-directory: backend
+        steps: 
+            - uses: actions/checkout@v6 # runner
+            - name: Set up node.js
+              uses: actions/setup-node@v7
+              with: 
+                node-version : '24.x'
+            
+            - name: install dependencies
+              run: npm ci
+            - name:  tests # test des 
+              run: npm run test
+            - name: Lint tests # test lint
+              run: npm run lint
+            # - name: DB test
+            #   run: npm run test:auth
+    # test-frontend:
+    #        runs-on : ubuntu-latest
+    #        steps:
+    #            - uses: actions/checkout@v6
+    #            - name: setup node.js
+    #              uses: actions/setup-node@v7
+    #              with:
+    #                node-version : '24.x' 
+
+
+
