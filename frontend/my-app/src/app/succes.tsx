@@ -1,11 +1,21 @@
-import { View, Text, Image, ScrollView, Pressable, StyleSheet, ImageSourcePropType } from "react-native";
+import { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  Image,
+  ScrollView,
+  Pressable,
+  StyleSheet,
+  ImageSourcePropType,
+  ActivityIndicator,
+} from "react-native";
 import { router } from "expo-router";
 import { colors } from "@/constants/colors";
- 
-// TODO: remplacer par les vraies valeurs (API / base de données)
-const CAPTURE_COUNT = 12;
-const TOTAL_ANIMALS = 30;
- 
+import { authClient } from "@/lib/auth-client";
+
+const API_URL = process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:3000";
+const TOTAL_ANIMALS = 50;
+
 type Milestone = {
   id: string;
   title: string;
@@ -14,7 +24,7 @@ type Milestone = {
   image: ImageSourcePropType;
   titleColor: string;
 };
- 
+
 const MILESTONES: Milestone[] = [
   {
     id: "bronze",
@@ -49,27 +59,72 @@ const MILESTONES: Milestone[] = [
     titleColor: "#5B3FA0",
   },
 ];
- 
+
 const ROW_HEIGHT = 140;
 const NODE_SIZE = 28;
 const BADGE_CENTER_Y = 48;
 const TRACK = "#D3D0C2";
 const MUTED = "#566056";
- 
+
 const clamp = (value: number) => Math.min(Math.max(value, 0), 1);
- 
+
 export default function SuccesScreen() {
+  const [captureCount, setCaptureCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data, error: apiError } = await authClient.$fetch<{
+          captureCount: number;
+        }>("/badges/progression", {
+          method: "GET",
+          baseURL: `${API_URL}/api`,
+        });
+        if (apiError || !data) {
+          throw new Error(`Erreur ${apiError?.status ?? ""}`.trim());
+        }
+        setCaptureCount(data.captureCount);
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Erreur de chargement");
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+
+  const CAPTURE_COUNT = captureCount;
   const nextMilestone = MILESTONES.find((m) => CAPTURE_COUNT < m.target);
- 
+
+  if (loading) {
+    return (
+      <View style={[styles.container, { justifyContent: "center" }]}>
+        <ActivityIndicator size="large" color={colors.green} />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={[styles.container, { justifyContent: "center", padding: 24 }]}>
+        <Text style={styles.subtitle}>Impossible de charger les succès ({error}).</Text>
+        <Pressable onPress={() => router.back()} style={styles.backButton}>
+          <Text style={styles.back}>← Retour</Text>
+        </Pressable>
+      </View>
+    );
+  }
+
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Pressable onPress={() => router.back()} style={styles.backButton}>
         <Text style={styles.back}>← Retour</Text>
       </Pressable>
- 
+
       <Text style={styles.title}>Succès</Text>
       <Text style={styles.subtitle}>Capture des animaux pour débloquer des badges.</Text>
- 
+
       <View style={styles.summary}>
         <View style={styles.summaryRow}>
           <Text style={styles.summaryCount}>
@@ -91,7 +146,7 @@ export default function SuccesScreen() {
             : "Tu as débloqué tous les badges, bravo !"}
         </Text>
       </View>
- 
+
       <View style={styles.timeline}>
         {MILESTONES.map((milestone, index) => {
           const next = MILESTONES[index + 1];
@@ -100,7 +155,7 @@ export default function SuccesScreen() {
           const segmentRatio = next
             ? clamp((CAPTURE_COUNT - milestone.target) / (next.target - milestone.target))
             : 0;
- 
+
           return (
             <View key={milestone.id} style={styles.row}>
               <View style={styles.nodeColumn}>
@@ -119,19 +174,19 @@ export default function SuccesScreen() {
                   {unlocked ? <Text style={styles.nodeCheck}>✓</Text> : null}
                 </View>
               </View>
- 
+
               <Image
                 source={milestone.image}
                 style={[styles.badgeImage, !unlocked && styles.badgeImageLocked]}
                 resizeMode="contain"
               />
- 
+
               <View style={styles.info}>
                 <Text style={[styles.badgeTitle, { color: milestone.titleColor }]}>
                   {milestone.title}
                 </Text>
                 <Text style={styles.badgeDescription}>{milestone.description}</Text>
- 
+
                 {unlocked ? (
                   <View style={[styles.pill, styles.pillUnlocked]}>
                     <Text style={styles.pillUnlockedText}>Débloqué</Text>
@@ -157,7 +212,7 @@ export default function SuccesScreen() {
     </ScrollView>
   );
 }
- 
+
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: {
@@ -173,7 +228,7 @@ const styles = StyleSheet.create({
   back: { color: colors.green, fontSize: 16, fontWeight: "bold" },
   title: { fontSize: 32, fontWeight: "bold", color: colors.green },
   subtitle: { fontSize: 16, color: MUTED, marginBottom: 12 },
- 
+
   summary: {
     backgroundColor: colors.white,
     borderWidth: 2,
@@ -194,10 +249,10 @@ const styles = StyleSheet.create({
   },
   summaryFill: { height: "100%", backgroundColor: colors.green, borderRadius: 6 },
   summaryHint: { fontSize: 14, color: MUTED },
- 
+
   timeline: { marginTop: 20 },
   row: { flexDirection: "row", height: ROW_HEIGHT, gap: 16 },
- 
+
   nodeColumn: { width: NODE_SIZE },
   segment: {
     position: "absolute",
@@ -225,14 +280,14 @@ const styles = StyleSheet.create({
   nodeUnlocked: { backgroundColor: colors.green, borderColor: colors.green },
   nodeCurrent: { backgroundColor: colors.white, borderColor: colors.green },
   nodeCheck: { color: colors.white, fontSize: 14, fontWeight: "bold" },
- 
+
   badgeImage: { width: 88, height: 96 },
   badgeImageLocked: { opacity: 0.35 },
- 
+
   info: { flex: 1, paddingTop: 14, gap: 4 },
   badgeTitle: { fontSize: 22, fontWeight: "bold" },
   badgeDescription: { fontSize: 14, color: MUTED },
- 
+
   pill: {
     alignSelf: "flex-start",
     marginTop: 4,
@@ -252,4 +307,3 @@ const styles = StyleSheet.create({
   pillLocked: { backgroundColor: "#E4E1D4" },
   pillLockedText: { color: MUTED, fontSize: 12, fontWeight: "bold" },
 });
- 

@@ -46,6 +46,7 @@ services:
     restart: unless-stopped
     environment:
       EXPO_DEVTOOLS_LISTEN_ADDRESS: 0.0.0.0
+      EXPO_PUBLIC_API_URL: http://${EXPO_HOST_IP:-localhost}:3000
       # Set EXPO_HOST_IP to this computer's Wi-Fi/LAN IP so Expo Go can reach Metro.
       REACT_NATIVE_PACKAGER_HOSTNAME: ${EXPO_HOST_IP:-localhost}
       EXPO_TOKEN: ${EXPO_TOKEN}

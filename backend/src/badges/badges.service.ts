@@ -29,6 +29,12 @@ export class BadgesService {
     return resultat;
   }
 
+  // Nombre d'animaux débloqués par le joueur
+  async progression(idUtilisateur: number) {
+    const debloques = await db.orm.public.AnimalDebloque.where({ idUtilisateur }).all();
+    return { captureCount: debloques.length };
+  }
+
   async findOne(id: number) {
     const badge = await db.orm.public.Trophee.where({ idTrophee: id }).first();
     if (!badge) throw new NotFoundException('Badge introuvable');
