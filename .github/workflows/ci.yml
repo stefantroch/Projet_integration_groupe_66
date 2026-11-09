@@ -1,0 +1,129 @@
+permissions: 
+    contents: read
+# Nom du script
+name : Tests CI 
+on: 
+    
+    pull_request:
+       branches: [dev,main]
+
+
+jobs:
+
+    test-backend:
+        runs-on: ubuntu-latest # Runner
+        # on a besoin de simuler la db
+        services:
+            postgres:
+                image: postgres:18-alpine
+                env:
+                    POSTGRES_USER: dev
+                    POSTGRES_PASSWORD: devtest
+                    POSTGRES_DB : projet66
+                ports:
+                 - 5432:5432
+                options: >-
+                    --health-cmd pg_isready
+                    --health-interval 10s
+                    --health-timeout 5s
+                    --health-retries 5
+
+        env:
+            DATABASE_URL: postgresql://dev:devtest@localhost:5432/projet66
+
+        # definir le working directory
+        defaults:
+            run:
+              working-directory: backend
+
+        # Ici les differents tests
+        steps: 
+            - uses: actions/checkout@v6 # runner
+            - name: Set up node.js
+              uses: actions/setup-node@v7
+              with: 
+                node-version : '24.x'
+            # Utiliser une cache pour les dép
+            - name: Cache npm backend packages-lock.json
+              uses: actions/cache@v4
+              env:
+                cache-name: cache-backend
+              with:
+                path: ~/.npm
+                key: ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles('backend/package-lock.json') }}
+                restore-keys: |
+                    ${{ runner.os }}-${{ env.cache-name }}-
+            
+
+            
+            - name: install dependencies
+              run: npm ci
+
+            # Tests lint // bonnes pratiques
+            - name: Lint tests 
+              run: npm run lint
+            # Tests Unitaires
+            - name:  tests 
+              run: npm run test
+            # Tests d'intégration
+            - name: Integration test
+              run: npm run test:auth
+
+
+    test-frontend:
+           runs-on: ubuntu-latest
+           defaults:
+            run:
+              working-directory: frontend/my-app
+           steps:
+              - uses: actions/checkout@v6
+              - name: setup node.js
+                uses: actions/setup-node@v7
+                with:
+                  node-version : '24.x'
+                
+              - name: cache npm frontend package-lock.json
+                uses: actions/cache@v4
+                env:
+                    cache-name: cache-frontend
+                with:
+                    path: ~/.npm
+                    key : ${{runner.os}}-${{env.cache-name}}-${{ hashFiles('frontend/my-app/package-lock.json') }}
+                    restore-keys: |
+                        ${{runner.os}}-${{env.cache-name}}-
+              - name: install dependancies
+                run: npm ci
+            # # Tests lint // bonnes pratiques
+              - name: Lint tests
+                run: npm run lint
+            # Verif des types (cohérences etc)
+              - name: tests types
+                run: npx tsc --noEmit
+    
+    test-ai-recgonition:
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: ai-recognition
+        steps:
+            - uses: actions/checkout@v6
+            - uses: actions/setup-python@v7
+              with:
+                python-version: '3.12'
+                cache: pip
+                cache-dependency-path: ai-recognition/requirements-api.txt
+
+            - name: Install PyTorch (CPU)
+              run: pip install torch==2.11.0 torchvision==0.26.0 --index-url https://download.pytorch.org/whl/cpu
+            - name: installation des requirements
+              run: pip install -r requirements-api.txt
+            - name: vérif que l'api se charge
+              run: python -c "import src.api"
+
+
+
+                
+            
+
+
+
