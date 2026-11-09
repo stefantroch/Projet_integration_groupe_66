@@ -3,9 +3,9 @@ permissions:
 # Nom du script
 name : Tests CI 
 on: 
-    push
-    # pull_request:
-    #     branches: dev
+    
+    pull_request:
+       branches: [dev,main]
 
 
 jobs:
