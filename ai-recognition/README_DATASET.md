@@ -1,6 +1,27 @@
 # Dataset iNaturalist
 
-Depuis ce dossier, avec `.venv` activé (`requests` et `Pillow` sont déjà installés) :
+## Installation de l'environnement Python
+
+Depuis la racine du dépôt, avec Python 3.12 installé (environnement local : 3.12.10) :
+
+```bash
+cd ai-recognition
+python3.12 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements-training.txt
+```
+
+Si `.venv` existe déjà, l'activer et installer les dépendances sans le recréer.
+Ces commandes d'activation concernent macOS/Linux, plateformes utilisées par le
+téléchargeur (`fcntl`). Le fichier `requirements-training.txt` fixe les versions
+relevées dans l'environnement local : PyTorch et torchvision pour le modèle,
+NumPy pour l'entraînement, Pillow pour les images, scikit-learn pour l'évaluation
+et requests pour la collecte. `requirements-api.txt` concerne le service HTTP
+et ne suffit pas pour entraîner le modèle.
+
+## Étape 1 : téléchargement
+
+Depuis ce dossier, avec `.venv` activé :
 
 ```bash
 python download_dataset.py --help
@@ -136,6 +157,58 @@ pour une copie du dataset. Ne pas lancer le téléchargeur pendant la séparatio
 `--dry-run` effectue les contrôles des sources et des affectations sans créer de fichiers.
 Codes de sortie : `0` succès, `1` erreur de données ou d'écriture, `2` arguments CLI invalides.
 Les images générées et l'environnement `.venv` ne doivent pas être ajoutés à Git.
+
+## Étape 3 : entraînement et évaluation
+
+Depuis `ai-recognition`, avec `.venv` activé et le découpage de l'étape 2 terminé :
+
+```bash
+# Vérifier le chargement des ensembles et afficher leurs effectifs
+python src/training/dataset.py
+
+# Entraîner le modèle
+python src/training/train.py
+
+# Évaluer le meilleur modèle sur l'ensemble de test
+python src/evaluation/evaluate.py
+```
+
+Les trois dossiers `data/splits/train/`, `data/splits/val/` et
+`data/splits/test/` doivent contenir les mêmes sous-dossiers d'espèces, chacun avec
+des images lisibles. Les scripts utilisent ces chemins fixes ; si le découpage a
+été créé ailleurs avec `--output`, adapter `DATA_DIR` dans
+`src/training/dataset.py` avant de lancer ces commandes.
+
+Le modèle est un ResNet18 préentraîné sur ImageNet. Seule sa dernière couche est
+entraînée ; le reste du réseau est gelé. Une connexion Internet est nécessaire au
+premier lancement pour télécharger les poids, ensuite conservés dans le cache
+PyTorch. L'évaluation utilise également ce cache lors de la création du modèle.
+
+Paramètres actuels :
+
+| Paramètre | Valeur | Fichier à modifier |
+| --- | --- | --- |
+| Époques | 10 | `src/training/train.py` : `EPOCHS` |
+| Taux d'apprentissage | 0.0001 | `src/training/train.py` : `LEARNING_RATE` |
+| Seed | 42 | `src/training/train.py` : `SEED` |
+| Taille des lots | 16 | `src/training/dataset.py` : `batch_size` |
+| Taille d'entrée | 224 × 224 pixels | `src/training/dataset.py` : transformations |
+
+L'optimiseur est Adam et la fonction de perte est `CrossEntropyLoss`. Le code
+choisit automatiquement MPS sur les Mac compatibles, sinon le CPU ; il ne
+sélectionne pas CUDA actuellement. La seed est fixée, mais ne garantit pas des
+résultats strictement identiques entre matériels et versions.
+
+Chaque époque affiche la perte et la précision sur les ensembles d'entraînement
+et de validation. Le meilleur modèle selon la précision de validation est écrit
+dans `checkpoints/best_model.pth`, avec les poids et la correspondance entre
+espèces et indices. **Une nouvelle exécution peut remplacer ce fichier** : copier
+le checkpoint ailleurs avant de relancer pour conserver une expérience.
+
+L'évaluation charge ce checkpoint et affiche sur l'ensemble de test la précision
+globale, la précision, le rappel et le score F1 par espèce, ainsi que la matrice de
+confusion. Conserver le test pour l'évaluation finale ; choisir les paramètres
+avec l'ensemble de validation.
 
 ## Références vérifiées le 16 octobre 2026
 
