@@ -10,6 +10,10 @@ export const frontendOrigins = (
 
 export const authOptions = {
   trustedOrigins: frontendOrigins,
+  session: {
+    // Durée de validité du jeton : 24 heures
+    expiresIn: 60 * 60 * 24,
+  },
   user: {
     modelName: 'Utilisateur',
     fields: {
