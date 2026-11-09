@@ -13,6 +13,7 @@ model Utilisateur {
   comptes          Account[]
   animauxDebloques AnimalDebloque[]
   trophees         TropheeUtilisateur[]
+  captures         Capture[]
 }
 
 model Session {
@@ -64,9 +65,10 @@ model Verification {
 
 model Animal {
   idAnimal     Int @id @default(autoincrement())
-  idZoo        Int
-
+  numero       Int @unique 
+  cleModele    String @unique
   nom          String
+  nomScientifique String
   famille      String
   habitat      String
   alimentation String
@@ -74,6 +76,8 @@ model Animal {
   imageFiche   String
 
   debloquePar AnimalDebloque[]
+  captures    Capture[]
+
 }
 
 model AnimalDebloque {
@@ -109,4 +113,21 @@ model TropheeUtilisateur {
   trophee     Trophee     @relation(fields: [idTrophee], references: [idTrophee])
 
   @@id([idUtilisateur, idTrophee])
+}
+
+model Capture {
+  idCapture     Int @id @default(autoincrement())
+  idUtilisateur Int 
+  idAnimal      Int
+  cheminPhoto   String
+  score         Float  // Score IA
+  dateCapture   TimestamptzString @default(now())
+
+  utilisateur Utilisateur @relation(fields: [idUtilisateur], references: [idUtilisateur], onDelete: Cascade)
+  animal      Animal      @relation(fields: [idAnimal], references: [idAnimal])
+
+  @@index([idUtilisateur, idAnimal])
+
+
+
 }

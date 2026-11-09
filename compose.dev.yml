@@ -48,6 +48,8 @@ services:
       EXPO_DEVTOOLS_LISTEN_ADDRESS: 0.0.0.0
       # Set EXPO_HOST_IP to this computer's Wi-Fi/LAN IP so Expo Go can reach Metro.
       REACT_NATIVE_PACKAGER_HOSTNAME: ${EXPO_HOST_IP:-localhost}
+      # Personal Expo access token (expo.dev > Account settings > Access tokens), set in the root .env.
+      EXPO_TOKEN: ${EXPO_TOKEN:-}
     ports:
       - "8081:8081"
       - "19000:19000"

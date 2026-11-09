@@ -13,7 +13,7 @@ export default function AccueilScreen() {
       <View style={styles.content}>
         <Text style={styles.logo}>Capturama</Text>
         <Text style={styles.title}>Bienvenue {session?.user.name}</Text>
-        <Text style={styles.subtitle}>Que veux-tu faire aujourd'hui ?</Text>
+        <Text style={styles.subtitle}>Que veux-tu faire aujourd’hui ?</Text>
 
         <View style={styles.grid}>
           {sections.map((section) => (

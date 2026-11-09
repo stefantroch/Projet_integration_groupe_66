@@ -46,7 +46,7 @@ export default function LoginForm() {
         <Text style={styles.buttonText}>Se connecter</Text>
       </Pressable>
 
-      <Link href="/signup" style={styles.link}>Pas de compte ? S'inscrire</Link>
+      <Link href="/signup" style={styles.link}>Pas de compte ? S’inscrire</Link>
     </View>
   );
 }
