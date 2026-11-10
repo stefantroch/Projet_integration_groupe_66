@@ -6,7 +6,7 @@
     "@better-auth/expo": "^1.7.10",
     "@expo/ui": "~58.0.27",
     "better-auth": "^1.7.10",
-    "expo": "~58.0.23",
+    "expo": "^58.0.0",
     "expo-constants": "~58.0.15",
     "expo-device": "~58.0.5",
     "expo-font": "~58.0.11",
@@ -33,9 +33,9 @@
     "react-native-worklets": "0.13.0"
   },
   "devDependencies": {
-    "@types/react": "~19.3.0",
+    "@types/react": "~19.2.2",
     "eslint": "^9.0.0",
-    "eslint-config-expo": "~58.0.4",
+    "eslint-config-expo": "~57.0.2",
     "typescript": "~6.0.3"
   },
   "scripts": {

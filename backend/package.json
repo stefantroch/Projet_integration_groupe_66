@@ -23,7 +23,9 @@
     "test:auth": "node --test test/auth.integration.mjs",
     "postinstall": "prisma skills sync || exit 0",
     "contract:emit": "prisma contract emit",
-    "db:migrate": "prisma db migrate --advance-ref db"
+    "db:migrate": "prisma db migrate --advance-ref db",
+    "db:seed": "node scripts/seed.ts"
+
   },
   "dependencies": {
     "@better-auth/expo": "^1.7.18",

@@ -102,6 +102,8 @@ await test('migration, shared user, password login, session and game relations',
     );
     await fixture.query('DELETE FROM "user"');
     migrate('20261014T1953_better_auth_utilisateur');
+    // Apply every later migration so the schema matches the current contract.
+    migrate(contractJson.storage.storageHash);
 
     const testAuth = betterAuth({
       ...authOptions,
@@ -181,7 +183,7 @@ await test('migration, shared user, password login, session and game relations',
 
     const animal = (
       await fixture.query(
-        `INSERT INTO "Animal" ("idZoo", "nom", "famille", "habitat", "alimentation", "description", "imageFiche") VALUES (1, 'Lion', 'Felidae', 'Savane', 'Carnivore', 'Test', 'lion.png') RETURNING "idAnimal"`,
+        `INSERT INTO "Animal" ("numero", "cleModele", "nom", "nomScientifique", "famille", "habitat", "alimentation", "description", "imageFiche") VALUES (1, 'panthera_leo', 'Lion', 'Panthera leo', 'Felidae', 'Savane', 'Carnivore', 'Test', 'lion.png') RETURNING "idAnimal"`,
       )
     ).rows[0];
     const trophy = (
