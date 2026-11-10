@@ -14,78 +14,66 @@ import { colors } from "@/constants/colors";
 import { authClient } from "@/lib/auth-client";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:3000";
-const TOTAL_ANIMALS = 50;
 
-type Milestone = {
-  id: string;
-  title: string;
+// Réponse de GET /api/badges
+type Badge = {
+  idTrophee: number;
+  nom: string;
   description: string;
-  target: number;
-  image: ImageSourcePropType;
-  titleColor: string;
+  conditionObtention: string;
+  icone: string;
+  obtenu: boolean;
+  dateObtention: string | null;
 };
 
-const MILESTONES: Milestone[] = [
-  {
-    id: "bronze",
-    title: "Bronze",
-    description: "Capture 5 animaux",
-    target: 5,
-    image: require("../assets/badges/bronze.png"),
-    titleColor: "#8A5330",
-  },
-  {
-    id: "argent",
-    title: "Argent",
-    description: "Capture 10 animaux",
-    target: 10,
-    image: require("../assets/badges/argent.png"),
-    titleColor: "#4B5563",
-  },
-  {
-    id: "or",
-    title: "Or",
-    description: "Capture 20 animaux",
-    target: 20,
-    image: require("../assets/badges/or.png"),
-    titleColor: "#8A6A0B",
-  },
-  {
-    id: "ultime",
-    title: "Ultime",
-    description: "Capture tous les animaux",
-    target: TOTAL_ANIMALS,
-    image: require("../assets/badges/ultime.png"),
-    titleColor: "#5B3FA0",
-  },
-];
+// Le champ `icone` d'un trophée choisit l'image ; image bronze par défaut
+const BADGE_IMAGES: Record<string, ImageSourcePropType> = {
+  bronze: require("../assets/badges/bronze.png"),
+  argent: require("../assets/badges/argent.png"),
+  or: require("../assets/badges/or.png"),
+  ultime: require("../assets/badges/ultime.png"),
+};
 
-const ROW_HEIGHT = 140;
-const NODE_SIZE = 28;
-const BADGE_CENTER_Y = 48;
-const TRACK = "#D3D0C2";
+const badgeImage = (icone: string) =>
+  BADGE_IMAGES[icone.replace(/\.png$/, "").toLowerCase()] ?? BADGE_IMAGES.bronze;
+
+const formatDate = (iso: string) =>
+  new Date(iso).toLocaleDateString("fr-BE", { day: "numeric", month: "long", year: "numeric" });
+
 const MUTED = "#566056";
 
 const clamp = (value: number) => Math.min(Math.max(value, 0), 1);
 
+async function getApi<T>(path: string): Promise<T> {
+  const { data, error } = await authClient.$fetch<T>(path, {
+    method: "GET",
+    baseURL: `${API_URL}/api`,
+  });
+  if (error || !data) {
+    throw new Error(`Erreur ${error?.status ?? ""}`.trim());
+  }
+  return data;
+}
+
 export default function SuccesScreen() {
   const [captureCount, setCaptureCount] = useState(0);
+  const [totalAnimals, setTotalAnimals] = useState(0);
+  const [badges, setBadges] = useState<Badge[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
       try {
-        const { data, error: apiError } = await authClient.$fetch<{
-          captureCount: number;
-        }>("/badges/progression", {
-          method: "GET",
-          baseURL: `${API_URL}/api`,
-        });
-        if (apiError || !data) {
-          throw new Error(`Erreur ${apiError?.status ?? ""}`.trim());
-        }
-        setCaptureCount(data.captureCount);
+        const [progression, animaux, listeBadges] = await Promise.all([
+          getApi<{ captureCount: number }>("/badges/progression"),
+          getApi<unknown[]>("/animaux"),
+          getApi<Badge[]>("/badges"),
+        ]);
+        setCaptureCount(progression.captureCount);
+        setTotalAnimals(animaux.length);
+        // Badges obtenus d'abord
+        setBadges([...listeBadges].sort((a, b) => Number(b.obtenu) - Number(a.obtenu)));
       } catch (e) {
         setError(e instanceof Error ? e.message : "Erreur de chargement");
       } finally {
@@ -94,8 +82,8 @@ export default function SuccesScreen() {
     })();
   }, []);
 
-  const CAPTURE_COUNT = captureCount;
-  const nextMilestone = MILESTONES.find((m) => CAPTURE_COUNT < m.target);
+  const remaining = Math.max(totalAnimals - captureCount, 0);
+  const obtainedCount = badges.filter((b) => b.obtenu).length;
 
   if (loading) {
     return (
@@ -128,7 +116,7 @@ export default function SuccesScreen() {
       <View style={styles.summary}>
         <View style={styles.summaryRow}>
           <Text style={styles.summaryCount}>
-            {CAPTURE_COUNT} / {TOTAL_ANIMALS}
+            {captureCount} / {totalAnimals}
           </Text>
           <Text style={styles.summaryLabel}>animaux capturés</Text>
         </View>
@@ -136,79 +124,63 @@ export default function SuccesScreen() {
           <View
             style={[
               styles.summaryFill,
-              { width: `${clamp(CAPTURE_COUNT / TOTAL_ANIMALS) * 100}%` },
+              { width: `${totalAnimals ? clamp(captureCount / totalAnimals) * 100 : 0}%` },
             ]}
           />
         </View>
         <Text style={styles.summaryHint}>
-          {nextMilestone
-            ? `Encore ${nextMilestone.target - CAPTURE_COUNT} animaux pour le badge ${nextMilestone.title}`
-            : "Tu as débloqué tous les badges, bravo !"}
+          {remaining > 0
+            ? `Encore ${remaining} ${remaining > 1 ? "animaux" : "animal"} à découvrir`
+            : "Tu as découvert tous les animaux, bravo !"}
         </Text>
       </View>
 
-      <View style={styles.timeline}>
-        {MILESTONES.map((milestone, index) => {
-          const next = MILESTONES[index + 1];
-          const unlocked = CAPTURE_COUNT >= milestone.target;
-          const isCurrent = !unlocked && nextMilestone?.id === milestone.id;
-          const segmentRatio = next
-            ? clamp((CAPTURE_COUNT - milestone.target) / (next.target - milestone.target))
-            : 0;
+      <Text style={styles.sectionTitle}>
+        Badges · {obtainedCount} / {badges.length}
+      </Text>
 
-          return (
-            <View key={milestone.id} style={styles.row}>
-              <View style={styles.nodeColumn}>
-                {next ? (
-                  <View style={styles.segment}>
-                    <View style={[styles.segmentFill, { height: `${segmentRatio * 100}%` }]} />
-                  </View>
-                ) : null}
-                <View
-                  style={[
-                    styles.node,
-                    unlocked && styles.nodeUnlocked,
-                    isCurrent && styles.nodeCurrent,
-                  ]}
-                >
-                  {unlocked ? <Text style={styles.nodeCheck}>✓</Text> : null}
-                </View>
-              </View>
-
+      {badges.length === 0 ? (
+        <Text style={styles.empty}>Aucun badge disponible pour le moment.</Text>
+      ) : (
+        <View style={styles.list}>
+          {badges.map((badge) => (
+            <View
+              key={badge.idTrophee}
+              style={[styles.card, !badge.obtenu && styles.cardLocked]}
+              accessibilityLabel={`${badge.nom}, ${badge.obtenu ? "obtenu" : "non obtenu"}`}
+            >
               <Image
-                source={milestone.image}
-                style={[styles.badgeImage, !unlocked && styles.badgeImageLocked]}
+                source={badgeImage(badge.icone)}
+                style={[styles.badgeImage, !badge.obtenu && styles.badgeImageLocked]}
                 resizeMode="contain"
               />
 
               <View style={styles.info}>
-                <Text style={[styles.badgeTitle, { color: milestone.titleColor }]}>
-                  {milestone.title}
+                <Text style={[styles.badgeTitle, !badge.obtenu && styles.badgeTitleLocked]}>
+                  {badge.nom}
                 </Text>
-                <Text style={styles.badgeDescription}>{milestone.description}</Text>
+                <Text style={styles.badgeDescription}>
+                  {badge.obtenu ? badge.description : badge.conditionObtention}
+                </Text>
 
-                {unlocked ? (
+                {badge.obtenu ? (
                   <View style={[styles.pill, styles.pillUnlocked]}>
-                    <Text style={styles.pillUnlockedText}>Débloqué</Text>
-                  </View>
-                ) : isCurrent ? (
-                  <View style={[styles.pill, styles.pillCurrent]}>
-                    <Text style={styles.pillCurrentText}>
-                      En cours · {CAPTURE_COUNT} / {milestone.target}
+                    <Text style={styles.pillUnlockedText}>
+                      {badge.dateObtention
+                        ? `Obtenu le ${formatDate(badge.dateObtention)}`
+                        : "Obtenu"}
                     </Text>
                   </View>
                 ) : (
                   <View style={[styles.pill, styles.pillLocked]}>
-                    <Text style={styles.pillLockedText}>
-                      Verrouillé · {CAPTURE_COUNT} / {milestone.target}
-                    </Text>
+                    <Text style={styles.pillLockedText}>À débloquer</Text>
                   </View>
                 )}
               </View>
             </View>
-          );
-        })}
-      </View>
+          ))}
+        </View>
+      )}
     </ScrollView>
   );
 }
@@ -250,42 +222,26 @@ const styles = StyleSheet.create({
   summaryFill: { height: "100%", backgroundColor: colors.green, borderRadius: 6 },
   summaryHint: { fontSize: 14, color: MUTED },
 
-  timeline: { marginTop: 20 },
-  row: { flexDirection: "row", height: ROW_HEIGHT, gap: 16 },
+  sectionTitle: { fontSize: 20, fontWeight: "bold", color: colors.green, marginTop: 24 },
+  empty: { fontSize: 14, color: MUTED },
 
-  nodeColumn: { width: NODE_SIZE },
-  segment: {
-    position: "absolute",
-    left: 12,
-    top: BADGE_CENTER_Y,
-    width: 4,
-    height: ROW_HEIGHT,
-    backgroundColor: TRACK,
-    borderRadius: 2,
-  },
-  segmentFill: { backgroundColor: colors.green, borderRadius: 2 },
-  node: {
-    position: "absolute",
-    left: 0,
-    top: BADGE_CENTER_Y - NODE_SIZE / 2,
-    width: NODE_SIZE,
-    height: NODE_SIZE,
-    borderRadius: NODE_SIZE / 2,
-    backgroundColor: "#E4E1D4",
-    borderWidth: 4,
-    borderColor: TRACK,
+  list: { gap: 12, marginTop: 8 },
+  card: {
+    flexDirection: "row",
+    gap: 16,
     alignItems: "center",
-    justifyContent: "center",
+    backgroundColor: colors.white,
+    borderRadius: 16,
+    padding: 12,
   },
-  nodeUnlocked: { backgroundColor: colors.green, borderColor: colors.green },
-  nodeCurrent: { backgroundColor: colors.white, borderColor: colors.green },
-  nodeCheck: { color: colors.white, fontSize: 14, fontWeight: "bold" },
+  cardLocked: { backgroundColor: "#EFEDE4" },
 
-  badgeImage: { width: 88, height: 96 },
+  badgeImage: { width: 72, height: 80 },
   badgeImageLocked: { opacity: 0.35 },
 
-  info: { flex: 1, paddingTop: 14, gap: 4 },
-  badgeTitle: { fontSize: 22, fontWeight: "bold" },
+  info: { flex: 1, gap: 4 },
+  badgeTitle: { fontSize: 20, fontWeight: "bold", color: colors.green },
+  badgeTitleLocked: { color: MUTED },
   badgeDescription: { fontSize: 14, color: MUTED },
 
   pill: {
@@ -297,13 +253,6 @@ const styles = StyleSheet.create({
   },
   pillUnlocked: { backgroundColor: colors.green },
   pillUnlockedText: { color: colors.white, fontSize: 12, fontWeight: "bold" },
-  pillCurrent: {
-    backgroundColor: colors.white,
-    borderWidth: 2,
-    borderColor: colors.green,
-    paddingVertical: 2,
-  },
-  pillCurrentText: { color: colors.green, fontSize: 12, fontWeight: "bold" },
   pillLocked: { backgroundColor: "#E4E1D4" },
   pillLockedText: { color: MUTED, fontSize: 12, fontWeight: "bold" },
 });
