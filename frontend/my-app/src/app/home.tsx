@@ -6,7 +6,7 @@ import { router } from "expo-router";
 const sections = ["Ma collection", "Capturer", "Habitat", "Succès"];
 
 export default function AccueilScreen() {
-  const { data: session } = authClient.useSession();
+  const { data: session } = authClient.useSession(); //n
 
   return (
     <View style={styles.container}>
@@ -30,7 +30,10 @@ export default function AccueilScreen() {
             <Pressable
               key={section}
               style={styles.tile}
-              onPress={() => section === "Capturer" && router.push("/capture")}
+              onPress={() =>{
+                if (section === "Capturer") router.push("/capture");
+                if (section === "Succès") router.push("/succes");
+              }}
             >
               <View style={styles.tileButton}>
                 <Text style={styles.tileText}>{section}</Text>

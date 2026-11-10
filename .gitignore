@@ -65,3 +65,6 @@ dist/
 /ai-recognition/data/
 /ai-recognition/checkpoints/
 /ai-recognition/**/__pycache__/
+
+# Expo lancé depuis la racine du dépôt
+.expo/

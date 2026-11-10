@@ -14,6 +14,13 @@ export class BadgesController {
     return this.badgesService.findAll(Number(session.user.id));
   }
 
+  // Nombre d'animaux capturés par le joueur connecté (écran Succès)
+  // Doit rester AVANT la route ':id'
+  @Get('progression')
+  progression(@Session() session: UserSession) {
+    return this.badgesService.progression(Number(session.user.id));
+  }
+
   // Détail d'un trophée via son ID
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
