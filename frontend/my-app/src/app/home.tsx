@@ -11,7 +11,17 @@ export default function AccueilScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.content}>
-        <Text style={styles.logo}>Capturama</Text>
+        <View style={styles.header}>
+          <Text style={styles.logo}>Capturama</Text>
+          <Pressable
+            style={styles.profileButton}
+            onPress={() => router.push("/profile")}
+            accessibilityRole="button"
+            accessibilityLabel="Voir mon profil"
+          >
+            <Text style={styles.profileText}>Profil</Text>
+          </Pressable>
+        </View>
         <Text style={styles.title}>Bienvenue {session?.user.name}</Text>
         <Text style={styles.subtitle}>Que veux-tu faire aujourd’hui ?</Text>
 
@@ -49,7 +59,19 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     gap: 8,
   },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
   logo: { fontSize: 18, fontWeight: "bold", color: colors.green },
+  profileButton: {
+    backgroundColor: colors.green,
+    borderRadius: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+  },
+  profileText: { color: colors.white, fontSize: 14, fontWeight: "600" },
   title: { fontSize: 32, color: colors.green },
   subtitle: { fontSize: 16, color: colors.text, marginBottom: 16 },
   grid: {
