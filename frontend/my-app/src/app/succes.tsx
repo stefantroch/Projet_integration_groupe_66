@@ -12,9 +12,14 @@ import {
 import { router } from "expo-router";
 import { colors } from "@/constants/colors";
 import { authClient } from "@/lib/auth-client";
+import Constants from "expo-constants";
+import { Platform } from "react-native";
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:3000";
-
+const devHost = Constants.expoConfig?.hostUri?.split(":")[0] ?? "localhost";
+const API_URL =
+  process.env.EXPO_PUBLIC_API_URL ??
+  (Platform.OS === "web" ? "http://localhost:3000" : `http://${devHost}:3000`);
+  
 // Réponse de GET /api/badges
 type Badge = {
   idTrophee: number;
