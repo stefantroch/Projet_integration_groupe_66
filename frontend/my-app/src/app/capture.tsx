@@ -26,6 +26,25 @@ export default function CaptureScreen() {
     }
   };
 
+  const pickImage = async () => {
+    setErrorMessage("");
+
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      setErrorMessage("Autorise l'accès à la galerie pour importer une image.");
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      quality: 0.7,
+    });
+
+    if (!result.canceled) {
+      setPhotoUri(result.assets[0].uri);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Capturer</Text>
@@ -46,6 +65,19 @@ export default function CaptureScreen() {
       >
         <Text style={styles.buttonText}>
           {photoUri ? "Reprendre une photo" : "Prendre une photo"}
+        </Text>
+      </Pressable>
+
+      <Pressable
+        onPress={pickImage}
+        style={({ pressed }) => [
+          styles.button,
+          styles.secondaryButton,
+          pressed && { opacity: 0.6 },
+        ]}
+      >
+        <Text style={[styles.buttonText, styles.secondaryButtonText]}>
+          Importer une image
         </Text>
       </Pressable>
     </View>
@@ -88,4 +120,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   buttonText: { color: colors.white, fontSize: 16 },
+  secondaryButton: {
+    backgroundColor: colors.white,
+    borderWidth: 2,
+    borderColor: colors.green,
+  },
+  secondaryButtonText: { color: colors.green },
 });
