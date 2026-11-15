@@ -103,8 +103,9 @@ CREATE INDEX "verification_identifier_idx_79a0dbb3" ON public."verification" ("i
         ],
         postcheck: [
           {
-            description: 'The old user table must be gone',
-            sql: `SELECT to_regclass('public."user"') IS NULL AS result`,
+            description:
+              'The shared auth schema is installed and the old user table is gone',
+            sql: `SELECT (to_regclass('public."session"') IS NOT NULL AND to_regclass('public."user"') IS NULL) AS result`,
           },
         ],
       }),
