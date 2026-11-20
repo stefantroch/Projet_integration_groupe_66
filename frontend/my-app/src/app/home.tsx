@@ -31,6 +31,7 @@ export default function AccueilScreen() {
               key={section}
               style={styles.tile}
               onPress={() =>{
+                if (section === "Ma collection") router.push("/collection");
                 if (section === "Capturer") router.push("/capture");
                 if (section === "Succès") router.push("/succes");
               }}
