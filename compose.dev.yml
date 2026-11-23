@@ -5,7 +5,7 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: dev
-      POSTGRES_PASSWORD: devtest
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: projet66
     ports:
       - "5432:5432"
@@ -27,7 +27,7 @@ services:
       - ./backend/.env
     environment:
       PORT: 3000
-      DATABASE_URL: postgresql://dev:devtest@postgres:5432/projet66
+      DATABASE_URL: postgresql://dev:${POSTGRES_PASSWORD}@postgres:5432/projet66
     ports:
       - "3000:3000"
     volumes:
@@ -50,6 +50,7 @@ services:
       REACT_NATIVE_PACKAGER_HOSTNAME: ${EXPO_HOST_IP:-localhost}
       # Personal Expo access token (expo.dev > Account settings > Access tokens), set in the root .env.
       EXPO_TOKEN: ${EXPO_TOKEN:-}
+      EXPO_PUBLIC_API_URL: http://${EXPO_HOST_IP}:3000
     ports:
       - "8081:8081"
       - "19000:19000"
