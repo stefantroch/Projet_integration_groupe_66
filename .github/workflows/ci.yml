@@ -1,12 +1,12 @@
-permissions: 
+permissions:
     contents: read
 # Nom du script
-name : Tests CI 
-on: 
-    
-    pull_request:
-       branches: [dev,main]
-
+name : Tests CI
+on:
+  push:
+    branches: [dev]
+  pull_request:
+    branches: [dev, main]
 
 jobs:
 
