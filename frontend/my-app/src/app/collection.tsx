@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import {
   View,
   Text,
@@ -10,7 +10,7 @@ import {
   ActivityIndicator,
   Platform,
 } from "react-native";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import Constants from "expo-constants";
 import { colors } from "@/constants/colors";
 import { authClient } from "@/lib/auth-client";
@@ -62,19 +62,29 @@ export default function CollectionScreen() {
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<Animal | null>(null);
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const list = await getApi<Animal[]>("/animaux");
-        // Ordre de l'id (comme un Pokédex)
-        setAnimals([...list].sort((a, b) => a.idAnimal - b.idAnimal));
-      } catch (e) {
-        setError(e instanceof Error ? e.message : "Erreur de chargement");
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      let actif = true;
+      setLoading(true);
+      setError(null);
+      (async () => {
+        try {
+          const list = await getApi<Animal[]>("/animaux");
+          // Ordre de l'id (comme un Pokédex)
+          if (actif)
+            setAnimals([...list].sort((a, b) => a.idAnimal - b.idAnimal));
+        } catch (e) {
+          if (actif)
+            setError(e instanceof Error ? e.message : "Erreur de chargement");
+        } finally {
+          if (actif) setLoading(false);
+        }
+      })();
+      return () => {
+        actif = false;
+      };
+    }, []),
+  );
 
   const unlockedCount = animals.filter((a) => a.debloque).length;
   const total = animals.length;
@@ -89,8 +99,12 @@ export default function CollectionScreen() {
 
   if (error) {
     return (
-      <View style={[styles.container, { justifyContent: "center", padding: 24 }]}>
-        <Text style={styles.subtitle}>Impossible de charger ta collection ({error}).</Text>
+      <View
+        style={[styles.container, { justifyContent: "center", padding: 24 }]}
+      >
+        <Text style={styles.subtitle}>
+          Impossible de charger ta collection ({error}).
+        </Text>
         <Pressable onPress={() => router.back()} style={styles.backButton}>
           <Text style={styles.back}>← Retour</Text>
         </Pressable>
@@ -105,7 +119,9 @@ export default function CollectionScreen() {
       </Pressable>
 
       <Text style={styles.title}>Ma collection</Text>
-      <Text style={styles.subtitle}>Capture des animaux pour les débloquer.</Text>
+      <Text style={styles.subtitle}>
+        Capture des animaux pour les débloquer.
+      </Text>
 
       <View style={styles.summary}>
         <View style={styles.summaryRow}>
@@ -125,7 +141,9 @@ export default function CollectionScreen() {
       </View>
 
       {total === 0 ? (
-        <Text style={styles.empty}>Aucun animal disponible pour le moment.</Text>
+        <Text style={styles.empty}>
+          Aucun animal disponible pour le moment.
+        </Text>
       ) : (
         <View style={styles.grid}>
           {animals.map((animal) => (
@@ -145,11 +163,19 @@ export default function CollectionScreen() {
                 {hasImage(animal.imageFiche) ? (
                   <Image
                     source={{ uri: animal.imageFiche }}
-                    style={[styles.image, !animal.debloque && styles.imageLocked]}
+                    style={[
+                      styles.image,
+                      !animal.debloque && styles.imageLocked,
+                    ]}
                     resizeMode="contain"
                   />
                 ) : (
-                  <Text style={[styles.placeholder, !animal.debloque && styles.imageLocked]}>
+                  <Text
+                    style={[
+                      styles.placeholder,
+                      !animal.debloque && styles.imageLocked,
+                    ]}
+                  >
                     {animal.debloque ? "🐾" : "❔"}
                   </Text>
                 )}
@@ -164,10 +190,17 @@ export default function CollectionScreen() {
               </Text>
 
               <View
-                style={[styles.pill, animal.debloque ? styles.pillUnlocked : styles.pillLocked]}
+                style={[
+                  styles.pill,
+                  animal.debloque ? styles.pillUnlocked : styles.pillLocked,
+                ]}
               >
                 <Text
-                  style={animal.debloque ? styles.pillUnlockedText : styles.pillLockedText}
+                  style={
+                    animal.debloque
+                      ? styles.pillUnlockedText
+                      : styles.pillLockedText
+                  }
                 >
                   {animal.debloque ? "Débloqué" : "À débloquer"}
                 </Text>
@@ -268,7 +301,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#E4E1D4",
     overflow: "hidden",
   },
-  summaryFill: { height: "100%", backgroundColor: colors.green, borderRadius: 6 },
+  summaryFill: {
+    height: "100%",
+    backgroundColor: colors.green,
+    borderRadius: 6,
+  },
 
   grid: {
     flexDirection: "row",
