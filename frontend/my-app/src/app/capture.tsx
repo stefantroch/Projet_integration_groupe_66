@@ -127,7 +127,7 @@ export default function CaptureScreen() {
           {identifying ? (
             <ActivityIndicator color={colors.white} />
           ) : (
-            <Text style={styles.buttonText}>Reconnaître l'animal</Text>
+            <Text style={styles.buttonText}>{"Reconnaître l'animal"}</Text>
           )}
         </Pressable>
       ) : null}
