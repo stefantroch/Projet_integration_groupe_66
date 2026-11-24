@@ -20,7 +20,8 @@
     "strictPropertyInitialization": false,
     "types": [
       "vitest/globals",
-      "node"
+      "node",
+      "multer"
     ],
     "resolveJsonModule": true
   }
