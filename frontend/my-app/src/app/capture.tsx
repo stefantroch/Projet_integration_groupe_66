@@ -1,11 +1,65 @@
 import { useState } from "react";
-import { View, Text, Image, Pressable, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  Pressable,
+  StyleSheet,
+  ActivityIndicator,
+  Platform,
+} from "react-native";
+import Constants from "expo-constants";
 import * as ImagePicker from "expo-image-picker";
 import { colors } from "@/constants/colors";
+
+// Adresse du service de reconnaissance (ai-recognition, port 8000).
+// Même logique que pour l'API : l'IP du PC qui fait tourner Expo en mode téléphone.
+const devHost = Constants.expoConfig?.hostUri?.split(":")[0] ?? "localhost";
+const RECOGNITION_URL =
+  process.env.EXPO_PUBLIC_RECOGNITION_URL ??
+  (Platform.OS === "web" ? "http://localhost:8000" : `http://${devHost}:8000`);
+
+// Réponse de POST /predict (espèces les plus probables)
+type Prediction = { species: string; score: number };
+type PredictionResponse = { predictions: Prediction[] };
 
 export default function CaptureScreen() {
   const [photoUri, setPhotoUri] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
+  const [predictions, setPredictions] = useState<Prediction[]>([]);
+  const [identifying, setIdentifying] = useState(false);
+
+  // Envoie la photo au modèle d'IA et affiche les espèces proposées
+  const identifyAnimal = async () => {
+    if (!photoUri) return;
+    setErrorMessage("");
+    setPredictions([]);
+    setIdentifying(true);
+
+    try {
+      const form = new FormData();
+      // Format attendu par React Native pour un fichier local
+      form.append("image", {
+        uri: photoUri,
+        name: "photo.jpg",
+        type: "image/jpeg",
+      } as unknown as Blob);
+
+      const response = await fetch(`${RECOGNITION_URL}/predict`, {
+        method: "POST",
+        body: form,
+      });
+      if (!response.ok) {
+        throw new Error(`Erreur ${response.status}`);
+      }
+      const result: PredictionResponse = await response.json();
+      setPredictions(result.predictions);
+    } catch {
+      setErrorMessage("Impossible de reconnaître l'animal. Réessaie.");
+    } finally {
+      setIdentifying(false);
+    }
+  };
 
   const takePhoto = async () => {
     setErrorMessage("");
@@ -23,6 +77,7 @@ export default function CaptureScreen() {
 
     if (!result.canceled) {
       setPhotoUri(result.assets[0].uri);
+      setPredictions([]);
     }
   };
 
@@ -42,6 +97,7 @@ export default function CaptureScreen() {
 
     if (!result.canceled) {
       setPhotoUri(result.assets[0].uri);
+      setPredictions([]);
     }
   };
 
@@ -58,6 +114,33 @@ export default function CaptureScreen() {
       )}
 
       {errorMessage ? <Text style={styles.error}>{errorMessage}</Text> : null}
+
+      {photoUri ? (
+        <Pressable
+          onPress={identifyAnimal}
+          disabled={identifying}
+          style={({ pressed }) => [
+            styles.button,
+            (pressed || identifying) && { opacity: 0.6 },
+          ]}
+        >
+          {identifying ? (
+            <ActivityIndicator color={colors.white} />
+          ) : (
+            <Text style={styles.buttonText}>Reconnaître l'animal</Text>
+          )}
+        </Pressable>
+      ) : null}
+
+      {predictions.length > 0 ? (
+        <View style={styles.results}>
+          {predictions.map((p) => (
+            <Text key={p.species} style={styles.resultText}>
+              {p.species} : {Math.round(p.score * 100)} %
+            </Text>
+          ))}
+        </View>
+      ) : null}
 
       <Pressable
         onPress={takePhoto}
@@ -110,6 +193,8 @@ const styles = StyleSheet.create({
   },
   previewText: { color: colors.text },
   error: { color: colors.error, textAlign: "center" },
+  results: { gap: 6, alignItems: "center" },
+  resultText: { color: colors.text, fontSize: 16 },
   button: {
     width: "100%",
     maxWidth: 400,
