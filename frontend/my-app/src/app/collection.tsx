@@ -186,7 +186,12 @@ export default function CollectionScreen() {
         <Pressable style={styles.overlay} onPress={() => setSelected(null)}>
           {selected && (
             <Pressable style={styles.sheet} onPress={() => {}}>
-              <ScrollView contentContainerStyle={styles.sheetContent}>
+              <ScrollView
+                style={styles.sheetScroll}
+                contentContainerStyle={styles.sheetContent}
+                showsVerticalScrollIndicator
+                nestedScrollEnabled
+              >
                 <View style={styles.sheetImageWrapper}>
                   {hasImage(selected.imageFiche) ? (
                     <Image
@@ -324,6 +329,7 @@ const styles = StyleSheet.create({
     padding: 16,
     gap: 12,
   },
+  sheetScroll: { flexShrink: 1 },
   sheetContent: { gap: 10 },
   sheetImageWrapper: {
     width: "100%",
