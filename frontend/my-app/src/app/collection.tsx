@@ -5,6 +5,7 @@ import {
   Image,
   ScrollView,
   Pressable,
+  Modal,
   StyleSheet,
   ActivityIndicator,
   Platform,
@@ -25,6 +26,10 @@ const API_URL =
 type Animal = {
   idAnimal: number;
   nom: string;
+  famille: string;
+  habitat: string;
+  alimentation: string;
+  description: string;
   imageFiche: string; // URL, ou vide / autre chose tant qu'il n'y a pas d'image
   debloque: boolean;
 };
@@ -55,6 +60,7 @@ export default function CollectionScreen() {
   const [animals, setAnimals] = useState<Animal[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selected, setSelected] = useState<Animal | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -123,9 +129,16 @@ export default function CollectionScreen() {
       ) : (
         <View style={styles.grid}>
           {animals.map((animal) => (
-            <View
+            <Pressable
               key={animal.idAnimal}
-              style={[styles.card, !animal.debloque && styles.cardLocked]}
+              style={({ pressed }) => [
+                styles.card,
+                !animal.debloque && styles.cardLocked,
+                pressed && animal.debloque && { opacity: 0.7 },
+              ]}
+              disabled={!animal.debloque}
+              onPress={() => setSelected(animal)}
+              accessibilityRole={animal.debloque ? "button" : undefined}
               accessibilityLabel={`${animal.nom}, ${animal.debloque ? "débloqué" : "non débloqué"}`}
             >
               <View style={styles.imageWrapper}>
@@ -159,10 +172,62 @@ export default function CollectionScreen() {
                   {animal.debloque ? "Débloqué" : "À débloquer"}
                 </Text>
               </View>
-            </View>
+            </Pressable>
           ))}
         </View>
       )}
+
+      <Modal
+        visible={selected !== null}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setSelected(null)}
+      >
+        <Pressable style={styles.overlay} onPress={() => setSelected(null)}>
+          {selected && (
+            <Pressable style={styles.sheet} onPress={() => {}}>
+              <ScrollView
+                style={styles.sheetScroll}
+                contentContainerStyle={styles.sheetContent}
+                showsVerticalScrollIndicator
+                nestedScrollEnabled
+              >
+                <View style={styles.sheetImageWrapper}>
+                  {hasImage(selected.imageFiche) ? (
+                    <Image
+                      source={{ uri: selected.imageFiche }}
+                      style={styles.image}
+                      resizeMode="contain"
+                    />
+                  ) : (
+                    <Text style={styles.sheetPlaceholder}>🐾</Text>
+                  )}
+                </View>
+
+                <Text style={styles.sheetTitle}>{selected.nom}</Text>
+
+                {[
+                  { label: "Famille", value: selected.famille },
+                  { label: "Habitat", value: selected.habitat },
+                  { label: "Alimentation", value: selected.alimentation },
+                ].map((fact) => (
+                  <View key={fact.label} style={styles.factRow}>
+                    <Text style={styles.factLabel}>{fact.label}</Text>
+                    <Text style={styles.factValue}>{fact.value}</Text>
+                  </View>
+                ))}
+
+                <Text style={styles.factLabel}>Description</Text>
+                <Text style={styles.sheetDescription}>{selected.description}</Text>
+              </ScrollView>
+
+              <Pressable style={styles.closeButton} onPress={() => setSelected(null)}>
+                <Text style={styles.closeText}>Fermer</Text>
+              </Pressable>
+            </Pressable>
+          )}
+        </Pressable>
+      </Modal>
     </ScrollView>
   );
 }
@@ -245,4 +310,47 @@ const styles = StyleSheet.create({
   pillUnlockedText: { color: colors.white, fontSize: 12, fontWeight: "bold" },
   pillLocked: { backgroundColor: "#E4E1D4" },
   pillLockedText: { color: MUTED, fontSize: 12, fontWeight: "bold" },
+
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 24,
+  },
+  sheet: {
+    width: "100%",
+    maxWidth: 500,
+    maxHeight: "85%",
+    backgroundColor: colors.background,
+    borderWidth: 2,
+    borderColor: colors.green,
+    borderRadius: 20,
+    padding: 16,
+    gap: 12,
+  },
+  sheetScroll: { flexShrink: 1 },
+  sheetContent: { gap: 10 },
+  sheetImageWrapper: {
+    width: "100%",
+    aspectRatio: 1.4,
+    backgroundColor: colors.white,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 8,
+  },
+  sheetPlaceholder: { fontSize: 72 },
+  sheetTitle: { fontSize: 28, fontWeight: "bold", color: colors.green },
+  factRow: { gap: 2 },
+  factLabel: { fontSize: 12, fontWeight: "bold", color: MUTED, textTransform: "uppercase" },
+  factValue: { fontSize: 16, color: colors.green },
+  sheetDescription: { fontSize: 16, color: colors.text, lineHeight: 24 },
+  closeButton: {
+    backgroundColor: colors.green,
+    borderRadius: 12,
+    paddingVertical: 12,
+    alignItems: "center",
+  },
+  closeText: { color: colors.white, fontSize: 16, fontWeight: "bold" },
 });
