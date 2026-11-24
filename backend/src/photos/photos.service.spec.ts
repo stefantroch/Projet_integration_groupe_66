@@ -2,10 +2,28 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { PhotosService } from './photos.service.js';
 import { afterEach, vi } from 'vitest';
 
+const { chercherAnimal, premierAnimal } = vi.hoisted(() => ({
+  chercherAnimal: vi.fn(),
+  premierAnimal: vi.fn(),
+}));
+
+// Un test unitaire ne doit pas dépendre d'une vraie base PostgreSQL.
+vi.mock('../prisma/db.js', () => ({
+  db: {
+    orm: {
+      public: {
+        Animal: { where: chercherAnimal },
+      },
+    },
+  },
+}));
+
 describe('PhotosService', () => {
   let service: PhotosService;
 
   beforeEach(async () => {
+    chercherAnimal.mockReset().mockReturnValue({ first: premierAnimal });
+    premierAnimal.mockReset().mockResolvedValue(undefined);
     const module: TestingModule = await Test.createTestingModule({
       providers: [PhotosService],
     }).compile();
@@ -18,6 +36,7 @@ describe('PhotosService', () => {
   });
 
   afterEach(() => {
+    vi.restoreAllMocks();
     vi.unstubAllGlobals();
     vi.unstubAllEnvs();
     vi.useRealTimers();
@@ -29,15 +48,27 @@ describe('PhotosService', () => {
     mimetype: 'image/jpeg',
   } as Express.Multer.File;
 
-  it('transmet les octets dans le champ image et retourne les prédictions', async () => {
+  it('transmet la photo et retourne la meilleure prédiction avec l’animal de la DB', async () => {
     vi.stubEnv('RECOGNITION_URL', 'http://recognition:8000/');
     const resultat = {
-      predictions: [{ species: 'panthera_leo', score: 0.94 }],
+      predictions: [
+        { species: 'panthera_leo', score: 0.94 },
+        { species: 'panthera_tigris', score: 0.04 },
+      ],
     };
+    const animal = { idAnimal: 1, nom: 'Lion', cleModele: 'panthera_leo' };
+    premierAnimal.mockResolvedValue(animal);
     const appel = vi.fn().mockResolvedValue(Response.json(resultat));
     vi.stubGlobal('fetch', appel);
 
-    await expect(service.analyser(image)).resolves.toEqual(resultat);
+    await expect(service.analyser(image)).resolves.toEqual({
+      prediction: resultat.predictions[0],
+      animal,
+    });
+    expect(chercherAnimal).toHaveBeenCalledExactlyOnceWith({
+      cleModele: 'panthera_leo',
+    });
+    expect(premierAnimal).toHaveBeenCalledOnce();
     const [url, options] = appel.mock.calls[0];
     expect(url).toBe('http://recognition:8000/predict');
     expect(options.method).toBe('POST');
@@ -45,6 +76,19 @@ describe('PhotosService', () => {
     expect(fichier.name).toBe('lion.jpg');
     expect(fichier.type).toBe('image/jpeg');
     expect(Buffer.from(await fichier.arrayBuffer())).toEqual(image.buffer);
+  });
+
+  it('retourne animal: null si l’espèce reconnue n’existe pas en DB', async () => {
+    const prediction = { species: 'panthera_leo', score: 0.94 };
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(Response.json({ predictions: [prediction] })),
+    );
+
+    await expect(service.analyser(image)).resolves.toEqual({
+      prediction,
+      animal: null,
+    });
   });
 
   it.each([400, 413, 415, 503, 500])(
@@ -94,6 +138,5 @@ describe('PhotosService', () => {
     await expect(service.analyser(image)).rejects.toMatchObject({
       status: 504,
     });
-    vi.restoreAllMocks();
   });
 });
