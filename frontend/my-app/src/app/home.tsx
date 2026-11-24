@@ -34,6 +34,7 @@ export default function AccueilScreen() {
                 if (section === "Ma collection") router.push("/collection");
                 if (section === "Capturer") router.push("/capture");
                 if (section === "Succès") router.push("/succes");
+                if (section === "Habitat") router.push("/habitat");
               }}
             >
               <View style={styles.tileButton}>
