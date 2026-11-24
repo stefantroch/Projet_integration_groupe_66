@@ -10,6 +10,8 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { router } from "expo-router";
+import { File as ExpoFile } from "expo-file-system";
+import { fetch } from "expo/fetch";
 import * as ImagePicker from "expo-image-picker";
 import { API_URL, authClient } from "@/lib/auth-client";
 import { colors } from "@/constants/colors";
@@ -85,12 +87,8 @@ export default function CaptureScreen() {
         const fichier = photo.file ?? (await (await fetch(photo.uri)).blob());
         formulaire.append("image", fichier, photo.fileName ?? "photo.jpg");
       } else {
-        // React Native lit le fichier local à partir de son URI.
-        formulaire.append("image", {
-          uri: photo.uri,
-          name: photo.fileName ?? "photo.jpg",
-          type: photo.mimeType ?? "image/jpeg",
-        } as unknown as Blob);
+        // Expo 58 attend un fichier lisible (bytes), pas un simple objet URI.
+        formulaire.append("image", new ExpoFile(photo.uri));
       }
       const cookie =
         Platform.OS !== "web" ? await authClient.getCookie() : undefined;
