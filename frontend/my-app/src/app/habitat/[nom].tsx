@@ -66,22 +66,46 @@ export default function HabitatDetailScreen() {
       <Text style={styles.sectionTitle}>Animaux</Text>
 
       <View style={styles.list}>
-        {habitat.animaux.map((animal) => (
-          <View
-            key={animal.idAnimal}
-            style={[styles.card, !animal.debloque && styles.cardLocked]}
-            accessibilityLabel={`${animal.nom}, ${animal.debloque ? "débloqué" : "verrouillé"}`}
-          >
-            <View style={styles.info}>
-              <Text style={[styles.animalNom, !animal.debloque && styles.animalNomLocked]}>
-                {animal.nom}
-              </Text>
-              <Text style={styles.animalFamille}>{animal.famille}</Text>
-            </View>
-            {/* Cadenas affiché uniquement pour les animaux pas encore débloqués */}
-            {!animal.debloque && <Text style={styles.cadenas}>🔒</Text>}
-          </View>
-        ))}
+        {habitat.animaux.map((animal) => {
+          // Un animal débloqué est cliquable (fiche détaillée) ; un verrouillé non
+          const contenu = (
+            <>
+              <View style={styles.info}>
+                <Text style={[styles.animalNom, !animal.debloque && styles.animalNomLocked]}>
+                  {animal.nom}
+                </Text>
+                <Text style={styles.animalFamille}>{animal.famille}</Text>
+              </View>
+              {/* Cadenas affiché uniquement pour les animaux pas encore débloqués */}
+              {!animal.debloque && <Text style={styles.cadenas}>🔒</Text>}
+            </>
+          );
+
+          if (!animal.debloque) {
+            return (
+              <View
+                key={animal.idAnimal}
+                style={[styles.card, styles.cardLocked]}
+                accessibilityLabel={`${animal.nom}, verrouillé`}
+              >
+                {contenu}
+              </View>
+            );
+          }
+
+          return (
+            <Pressable
+              key={animal.idAnimal}
+              style={styles.card}
+              // Ouvre la fiche de l'animal : /animal/<idAnimal>
+              onPress={() => router.push(`/animal/${animal.idAnimal}`)}
+              accessibilityRole="button"
+              accessibilityLabel={`${animal.nom}, débloqué, voir la fiche`}
+            >
+              {contenu}
+            </Pressable>
+          );
+        })}
       </View>
     </ScrollView>
   );

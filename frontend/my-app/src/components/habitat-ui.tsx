@@ -4,21 +4,15 @@ import { colors } from "@/constants/colors";
 const MUTED = "#566056";
 
 // Photo de l'habitat. Tant qu'aucune URL n'est fournie (imageUrl = null),
-// on affiche un cadre vert avec une feuille à la place.
+// rien n'est affiché.
 export function ImageHabitat({ imageUrl, hauteur = 160 }: { imageUrl: string | null; hauteur?: number }) {
-  if (imageUrl) {
-    return (
-      <Image
-        source={{ uri: imageUrl }}
-        style={[styles.image, { height: hauteur }]}
-        resizeMode="cover"
-      />
-    );
-  }
+  if (!imageUrl) return null;
   return (
-    <View style={[styles.image, styles.placeholder, { height: hauteur }]}>
-      <Text style={styles.placeholderText}>🌿</Text>
-    </View>
+    <Image
+      source={{ uri: imageUrl }}
+      style={[styles.image, { height: hauteur }]}
+      resizeMode="cover"
+    />
   );
 }
 
@@ -40,8 +34,6 @@ export function BarreProgression({ valeur, total }: { valeur: number; total: num
 
 const styles = StyleSheet.create({
   image: { width: "100%", borderRadius: 16, backgroundColor: "#E4E1D4" },
-  placeholder: { alignItems: "center", justifyContent: "center", backgroundColor: colors.green },
-  placeholderText: { fontSize: 48 },
 
   progressionLigne: { flexDirection: "row", alignItems: "center", gap: 10 },
   piste: {
