@@ -27,6 +27,7 @@ services:
       - ./backend/.env
     environment:
       PORT: 3000
+      RECOGNITION_URL: http://recognition:8000
       DATABASE_URL: postgresql://dev:${POSTGRES_PASSWORD}@postgres:5432/projet66
     ports:
       - "3000:3000"
