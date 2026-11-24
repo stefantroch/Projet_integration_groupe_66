@@ -1,65 +1,34 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   View,
   Text,
   Image,
   Pressable,
   StyleSheet,
-  ActivityIndicator,
   Platform,
+  ScrollView,
+  ActivityIndicator,
 } from "react-native";
-import Constants from "expo-constants";
+import { router } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
+import { API_URL, authClient } from "@/lib/auth-client";
 import { colors } from "@/constants/colors";
 
-// Adresse du service de reconnaissance (ai-recognition, port 8000).
-// Même logique que pour l'API : l'IP du PC qui fait tourner Expo en mode téléphone.
-const devHost = Constants.expoConfig?.hostUri?.split(":")[0] ?? "localhost";
-const RECOGNITION_URL =
-  process.env.EXPO_PUBLIC_RECOGNITION_URL ??
-  (Platform.OS === "web" ? "http://localhost:8000" : `http://${devHost}:8000`);
-
-// Réponse de POST /predict (espèces les plus probables)
-type Prediction = { species: string; score: number };
-type PredictionResponse = { predictions: Prediction[] };
+type ResultatCapture = {
+  statut: "reconnu" | "incertain" | "inconnu";
+  prediction: { species: string; score: number };
+  animal: { idAnimal: number; nom: string } | null;
+  nouveauDeblocage: boolean;
+  dejaDebloque: boolean;
+};
 
 export default function CaptureScreen() {
   const [photoUri, setPhotoUri] = useState<string | null>(null);
+  const [photo, setPhoto] = useState<ImagePicker.ImagePickerAsset | null>(null);
+  const [resultat, setResultat] = useState<ResultatCapture | null>(null);
+  const [analyseEnCours, setAnalyseEnCours] = useState(false);
+  const verrou = useRef(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const [predictions, setPredictions] = useState<Prediction[]>([]);
-  const [identifying, setIdentifying] = useState(false);
-
-  // Envoie la photo au modèle d'IA et affiche les espèces proposées
-  const identifyAnimal = async () => {
-    if (!photoUri) return;
-    setErrorMessage("");
-    setPredictions([]);
-    setIdentifying(true);
-
-    try {
-      const form = new FormData();
-      // Format attendu par React Native pour un fichier local
-      form.append("image", {
-        uri: photoUri,
-        name: "photo.jpg",
-        type: "image/jpeg",
-      } as unknown as Blob);
-
-      const response = await fetch(`${RECOGNITION_URL}/predict`, {
-        method: "POST",
-        body: form,
-      });
-      if (!response.ok) {
-        throw new Error(`Erreur ${response.status}`);
-      }
-      const result: PredictionResponse = await response.json();
-      setPredictions(result.predictions);
-    } catch {
-      setErrorMessage("Impossible de reconnaître l'animal. Réessaie.");
-    } finally {
-      setIdentifying(false);
-    }
-  };
 
   const takePhoto = async () => {
     setErrorMessage("");
@@ -77,7 +46,8 @@ export default function CaptureScreen() {
 
     if (!result.canceled) {
       setPhotoUri(result.assets[0].uri);
-      setPredictions([]);
+      setPhoto(result.assets[0]);
+      setResultat(null);
     }
   };
 
@@ -97,12 +67,66 @@ export default function CaptureScreen() {
 
     if (!result.canceled) {
       setPhotoUri(result.assets[0].uri);
-      setPredictions([]);
+      setPhoto(result.assets[0]);
+      setResultat(null);
+    }
+  };
+
+  const analyserPhoto = async () => {
+    if (!photo || verrou.current || resultat) return;
+    verrou.current = true;
+    setAnalyseEnCours(true);
+    setErrorMessage("");
+    const controleur = new AbortController();
+    const delai = setTimeout(() => controleur.abort(), 45_000);
+    try {
+      const formulaire = new FormData();
+      if (Platform.OS === "web") {
+        const fichier = photo.file ?? (await (await fetch(photo.uri)).blob());
+        formulaire.append("image", fichier, photo.fileName ?? "photo.jpg");
+      } else {
+        // React Native lit le fichier local à partir de son URI.
+        formulaire.append("image", {
+          uri: photo.uri,
+          name: photo.fileName ?? "photo.jpg",
+          type: photo.mimeType ?? "image/jpeg",
+        } as unknown as Blob);
+      }
+      const cookie =
+        Platform.OS !== "web" ? await authClient.getCookie() : undefined;
+      const reponse = await fetch(`${API_URL}/api/photos`, {
+        method: "POST",
+        credentials: "include",
+        headers: cookie ? { Cookie: cookie } : undefined,
+        body: formulaire,
+        signal: controleur.signal,
+      });
+      if (reponse.status === 401)
+        throw new Error("Connecte-toi pour enregistrer une capture.");
+      if (!reponse.ok) {
+        const erreur = await reponse.json().catch(() => null);
+        throw new Error(
+          typeof erreur?.message === "string"
+            ? erreur.message
+            : "L’analyse a échoué. Réessaie.",
+        );
+      }
+      setResultat(await reponse.json());
+    } catch (erreur) {
+      setErrorMessage(
+        erreur instanceof Error
+          ? erreur.message
+          : "Impossible de joindre le serveur.",
+      );
+    } finally {
+      clearTimeout(delai);
+      verrou.current = false;
+      setAnalyseEnCours(false);
     }
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Capturer</Text>
 
       {photoUri ? (
@@ -115,34 +139,8 @@ export default function CaptureScreen() {
 
       {errorMessage ? <Text style={styles.error}>{errorMessage}</Text> : null}
 
-      {photoUri ? (
-        <Pressable
-          onPress={identifyAnimal}
-          disabled={identifying}
-          style={({ pressed }) => [
-            styles.button,
-            (pressed || identifying) && { opacity: 0.6 },
-          ]}
-        >
-          {identifying ? (
-            <ActivityIndicator color={colors.white} />
-          ) : (
-            <Text style={styles.buttonText}>{"Reconnaître l'animal"}</Text>
-          )}
-        </Pressable>
-      ) : null}
-
-      {predictions.length > 0 ? (
-        <View style={styles.results}>
-          {predictions.map((p) => (
-            <Text key={p.species} style={styles.resultText}>
-              {p.species} : {Math.round(p.score * 100)} %
-            </Text>
-          ))}
-        </View>
-      ) : null}
-
       <Pressable
+        disabled={analyseEnCours}
         onPress={takePhoto}
         style={({ pressed }) => [styles.button, pressed && { opacity: 0.6 }]}
       >
@@ -152,6 +150,7 @@ export default function CaptureScreen() {
       </Pressable>
 
       <Pressable
+        disabled={analyseEnCours}
         onPress={pickImage}
         style={({ pressed }) => [
           styles.button,
@@ -163,13 +162,50 @@ export default function CaptureScreen() {
           Importer une image
         </Text>
       </Pressable>
-    </View>
+      {photo && !resultat ? (
+        <Pressable
+          disabled={analyseEnCours}
+          onPress={analyserPhoto}
+          style={[styles.button, analyseEnCours && { opacity: 0.6 }]}
+        >
+          {analyseEnCours ? (
+            <ActivityIndicator color={colors.white} />
+          ) : (
+            <Text style={styles.buttonText}>Reconnaître l’animal</Text>
+          )}
+        </Pressable>
+      ) : null}
+      {resultat?.statut === "reconnu" ? (
+        <Pressable
+          onPress={() => router.push("/collection")}
+          style={[styles.button, styles.secondaryButton]}
+        >
+          <Text style={[styles.buttonText, styles.secondaryButtonText]}>
+            Voir ma collection
+          </Text>
+        </Pressable>
+      ) : null}
+      {resultat ? (
+        <View accessibilityLiveRegion="polite">
+          <Text style={styles.resultat}>
+            {resultat.statut === "reconnu"
+              ? `${resultat.animal?.nom} — ${resultat.nouveauDeblocage ? "Nouvel animal débloqué !" : "Déjà débloqué, nouvelle capture enregistrée."}`
+              : resultat.statut === "incertain"
+                ? "Photo trop incertaine. Reprends une photo plus nette de l’animal."
+                : "Cette espèce n’est pas encore disponible dans la collection."}
+          </Text>
+          <Text style={styles.previewText}>
+            Score du modèle : {Math.round(resultat.prediction.score * 100)} %
+          </Text>
+        </View>
+      ) : null}
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     backgroundColor: colors.background,
     justifyContent: "center",
     padding: 24,
@@ -179,7 +215,7 @@ const styles = StyleSheet.create({
   preview: {
     width: "100%",
     maxWidth: 400,
-    aspectRatio: 3 / 4,
+    aspectRatio: 4 / 3,
     alignSelf: "center",
     borderRadius: 20,
   },
@@ -192,9 +228,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   previewText: { color: colors.text },
+  resultat: {
+    color: colors.green,
+    fontSize: 18,
+    textAlign: "center",
+    marginBottom: 8,
+  },
   error: { color: colors.error, textAlign: "center" },
-  results: { gap: 6, alignItems: "center" },
-  resultText: { color: colors.text, fontSize: 16 },
   button: {
     width: "100%",
     maxWidth: 400,

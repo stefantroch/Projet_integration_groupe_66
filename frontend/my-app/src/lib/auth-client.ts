@@ -7,7 +7,7 @@ import { Platform } from "react-native";
 // IP du PC qui fait tourner Expo (ex : "192.168.1.42")
 const devHost = Constants.expoConfig?.hostUri?.split(":")[0] ?? "localhost";
 
-const API_URL =
+export const API_URL =
   process.env.EXPO_PUBLIC_API_URL ??
   (Platform.OS === "web" ? "http://localhost:3000" : `http://${devHost}:3000`);
 

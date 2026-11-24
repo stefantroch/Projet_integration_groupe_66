@@ -28,7 +28,10 @@ services:
     environment:
       PORT: 3000
       RECOGNITION_URL: http://recognition:8000
+      PHOTO_UPLOAD_DIR: /app/uploads/photos
       DATABASE_URL: postgresql://dev:${POSTGRES_PASSWORD}@postgres:5432/projet66
+    volumes:
+      - photos_data:/app/uploads
     ports:
       - "3000:3000"
     command: ["npm", "run", "start:dev"]
@@ -76,3 +79,4 @@ volumes:
   postgres18_data:
   backend_node_modules:
   frontend_node_modules:
+  photos_data:
