@@ -47,7 +47,8 @@ services:
       REACT_NATIVE_PACKAGER_HOSTNAME: ${EXPO_HOST_IP:-localhost}
       # Personal Expo access token (expo.dev > Account settings > Access tokens), set in the root .env.
       EXPO_TOKEN: ${EXPO_TOKEN:-}
-      EXPO_PUBLIC_API_URL: http://${EXPO_HOST_IP}:3000
+      EXPO_PUBLIC_API_URL: "${EXPO_PUBLIC_API_URL:-http://${EXPO_HOST_IP}:3000}"
+      EXPO_PACKAGER_PROXY_URL: "${EXPO_PACKAGER_PROXY_URL:-}"
     ports:
       - "8081:8081"
       - "19000:19000"
